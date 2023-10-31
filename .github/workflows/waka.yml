@@ -19,5 +19,6 @@ jobs:
           SHOW_TOTAL: true
           LANG_COUNT: 8
           TIME_RANGE: all_time
-          
-          
+          CODE_LANG: js
+          STOP_AT_OTHER: true
+          IGNORED_LANGUAGES: YAML JSON TOML
