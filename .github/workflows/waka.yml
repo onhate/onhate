@@ -17,7 +17,7 @@ jobs:
           WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
           SHOW_TITLE: true
           SHOW_TOTAL: true
-          LANG_COUNT: 8
+          LANG_COUNT: 12
           TIME_RANGE: all_time
           STOP_AT_OTHER: true
           IGNORED_LANGUAGES: YAML JSON TOML
