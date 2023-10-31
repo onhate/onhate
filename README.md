@@ -2,7 +2,7 @@
 
 <!--START_SECTION:waka-->
 
-```js
+```txt
 From: 07 June 2016 - To: 31 October 2023
 
 Total Time: 8,661 hrs 50 mins
