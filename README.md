@@ -6,13 +6,13 @@
 <!--START_SECTION:waka-->
 
 ```txt
-From: 07 June 2016 - To: 06 November 2023
+From: 07 June 2016 - To: 07 November 2023
 
-Total Time: 8,679 hrs 57 mins
+Total Time: 8,680 hrs 55 mins
 
-TypeScript                    3,844 hrs 22 mins███████████░░░░░░░░░░░░░░   43.54 %
+TypeScript                    3,845 hrs 18 mins███████████░░░░░░░░░░░░░░   43.54 %
 Java                          1,252 hrs 10 mins███▓░░░░░░░░░░░░░░░░░░░░░   14.18 %
-JavaScript                    745 hrs 46 mins ██░░░░░░░░░░░░░░░░░░░░░░░   08.45 %
+JavaScript                    745 hrs 46 mins ██░░░░░░░░░░░░░░░░░░░░░░░   08.44 %
 Vue.js                        436 hrs 45 mins █▒░░░░░░░░░░░░░░░░░░░░░░░   04.95 %
 Groovy                        289 hrs 40 mins ▓░░░░░░░░░░░░░░░░░░░░░░░░   03.28 %
 HTML                          197 hrs 26 mins ▓░░░░░░░░░░░░░░░░░░░░░░░░   02.24 %
