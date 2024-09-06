@@ -6,11 +6,11 @@
 <!--START_SECTION:waka-->
 
 ```txt
-From: 07 June 2016 - To: 04 September 2024
+From: 07 June 2016 - To: 05 September 2024
 
-Total Time: 9,625 hrs
+Total Time: 9,625 hrs 45 mins
 
-TypeScript                    4,519 hrs 18 mins███████████▓░░░░░░░░░░░░░   46.23 %
+TypeScript                    4,520 hrs 2 mins███████████▓░░░░░░░░░░░░░   46.23 %
 Java                          1,268 hrs 48 mins███▒░░░░░░░░░░░░░░░░░░░░░   12.98 %
 JavaScript                    803 hrs 36 mins ██░░░░░░░░░░░░░░░░░░░░░░░   08.22 %
 YAML                          486 hrs 44 mins █▒░░░░░░░░░░░░░░░░░░░░░░░   04.98 %
