@@ -18,6 +18,6 @@ jobs:
           SHOW_TITLE: true
           SHOW_TOTAL: true
           LANG_COUNT: 12
-          TIME_RANGE: all_time
+          TIME_RANGE: last_year
           STOP_AT_OTHER: true
           IGNORED_LANGUAGES: YAML JSON TOML
