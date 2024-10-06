@@ -6,16 +6,14 @@
 <!--START_SECTION:waka-->
 
 ```txt
-From: 07 June 2016 - To: 04 October 2024
+From: 07 June 2016 - To: 05 October 2024
 
 Total Time: 9,668 hrs
 
 TypeScript                    4,539 hrs 10 mins███████████▓░░░░░░░░░░░░░   46.23 %
 Java                          1,270 hrs 53 mins███▒░░░░░░░░░░░░░░░░░░░░░   12.94 %
 JavaScript                    805 hrs 54 mins ██░░░░░░░░░░░░░░░░░░░░░░░   08.21 %
-YAML                          486 hrs 55 mins █▒░░░░░░░░░░░░░░░░░░░░░░░   04.96 %
 Vue.js                        446 hrs 23 mins █░░░░░░░░░░░░░░░░░░░░░░░░   04.55 %
-JSON                          446 hrs 17 mins █░░░░░░░░░░░░░░░░░░░░░░░░   04.55 %
 Groovy                        292 hrs 19 mins ▓░░░░░░░░░░░░░░░░░░░░░░░░   02.98 %
 HTML                          201 hrs 17 mins ▓░░░░░░░░░░░░░░░░░░░░░░░░   02.05 %
 GraphQL                       188 hrs 44 mins ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.92 %
