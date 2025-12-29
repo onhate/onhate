@@ -5,5 +5,22 @@
 [![wakatime](https://wakatime.com/badge/user/8236adc9-dc0e-46ed-abd2-629061050f76.svg)](https://wakatime.com/@8236adc9-dc0e-46ed-abd2-629061050f76)
 
 <!--START_SECTION:waka-->
+
+```txt
+From: 07 June 2016 - To: 29 December 2025
+
+Total Time: 10,596 hrs 19 mins
+
+TypeScript                    5,121 hrs 14 mins████████████░░░░░░░░░░░░░   47.65 %
+Java                          1,271 hrs 21 mins███░░░░░░░░░░░░░░░░░░░░░░   11.83 %
+JavaScript                    863 hrs 6 mins  ██░░░░░░░░░░░░░░░░░░░░░░░   08.03 %
+Vue.js                        446 hrs 29 mins █░░░░░░░░░░░░░░░░░░░░░░░░   04.15 %
+Groovy                        298 hrs 23 mins ▓░░░░░░░░░░░░░░░░░░░░░░░░   02.78 %
+HTML                          204 hrs 23 mins ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.90 %
+GraphQL                       190 hrs 29 mins ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.77 %
+Transact-SQL                  171 hrs 31 mins ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.60 %
+Other                         151 hrs 21 mins ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.41 %
+```
+
 <!--END_SECTION:waka-->
 
