@@ -7,19 +7,18 @@
 <!--START_SECTION:waka-->
 
 ```txt
-From: 07 June 2016 - To: 18 February 2026
+From: 07 June 2016 - To: 19 February 2026
 
-Total Time: 10,791 hrs 50 mins
+Total Time: 10,796 hrs 38 mins
 
-TypeScript                    5,193 hrs 17 mins     ████████████░░░░░░░░░░░░░   47.37 %
-Java                          1,271 hrs 23 mins     ███░░░░░░░░░░░░░░░░░░░░░░   11.60 %
+TypeScript                    5,196 hrs 24 mins     ████████████░░░░░░░░░░░░░   47.38 %
+Java                          1,271 hrs 23 mins     ███░░░░░░░░░░░░░░░░░░░░░░   11.59 %
 JavaScript                    863 hrs 56 mins       ██░░░░░░░░░░░░░░░░░░░░░░░   07.88 %
 Vue.js                        446 hrs 32 mins       █░░░░░░░░░░░░░░░░░░░░░░░░   04.07 %
 Groovy                        298 hrs 40 mins       ▓░░░░░░░░░░░░░░░░░░░░░░░░   02.72 %
 HTML                          204 hrs 39 mins       ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.87 %
 GraphQL                       190 hrs 29 mins       ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.74 %
-Transact-SQL                  171 hrs 31 mins       ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.56 %
-Other                         170 hrs 35 mins       ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.56 %
+Other                         171 hrs 42 mins       ▒░░░░░░░░░░░░░░░░░░░░░░░░   01.57 %
 ```
 
 <!--END_SECTION:waka-->
