@@ -6,15 +6,21 @@
 
 <!--START_SECTION:waka-->
 
-### Coding activity
+<picture>
+  <source media="(max-width: 540px) and (prefers-color-scheme: dark)" srcset="assets/wakatime-summary-dark-mobile.svg">
+  <source media="(max-width: 540px)" srcset="assets/wakatime-summary-light-mobile.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-summary-dark.svg">
+  <img alt="Human and AI coding totals. Top language percentages from the last 30 days." src="assets/wakatime-summary-light.svg" width="760">
+</picture>
+
+<picture>
+  <source media="(max-width: 540px) and (prefers-color-scheme: dark)" srcset="assets/wakatime-activity-dark-mobile.svg">
+  <source media="(max-width: 540px)" srcset="assets/wakatime-activity-light-mobile.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-activity-dark.svg">
+  <img alt="Recent coding activity: last 7 days, last 30 days, and all-time totals." src="assets/wakatime-activity-light.svg" width="760">
+</picture>
 
 Time totals include Other. Missing measurements are not treated as zero.
-
-| Period | Total time | Daily average | Active days |
-| --- | --- | --- | --- |
-| Last 7 days | 101 hrs 59 mins | 14 hrs 34 mins | 7 |
-| Last 30 days | 276 hrs 29 mins | 10 hrs 38 mins | 26 |
-| All time | 12,777 hrs 2 mins | 4 hrs 36 mins | 2,772 |
 
 <details>
 <summary>Last 7 days: full stats</summary>
@@ -196,7 +202,7 @@ Best day: 2026-10-27 — 22 hrs 4 mins.
 
 </details>
 
-<details>
+<details open>
 <summary>All time: full stats</summary>
 
 Period: 2016-06-07T03:00:00Z to 2026-10-29T02:59:59Z.
