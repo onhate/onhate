@@ -33,30 +33,27 @@ pull requests run tests only. The workflow commits README.md and the generated
 
 ## Data
 
-The unified banner gives human coding and AI coding equal space. Its category
-hours and added-line counts use all-time data. Its top three languages and remaining
-language share use last-30-day percentages. Both periods are labeled explicitly.
+One unified image follows the `Coding activity` heading. Human and AI coding
+have equal space at the top. Category hours and line additions and deletions use
+all-time data. The recent focus compares 7-day and 30-day totals, daily averages,
+and active-day counts. Its language percentages use each labeled period.
 
-The Recent coding activity graphic compares 7-day and 30-day totals, daily averages,
-and active-day counts, with lifetime totals below. The blocks show counts, not dates.
-Each graphic has light and dark desktop images and one narrow-screen image that
-inherits the page's color scheme. Screen-width queries and theme queries stay
-separate: signed-in GitHub rewrites theme queries and can remove other conditions
-combined with them. This keeps the mobile image from being selected on desktop.
-The SVGs contain no scripts,
-external fonts, or network requests. Python's standard library generates them from
-the same three Stats responses. No additional API calls are needed.
+Each recent column shows five languages, two tools, human and AI line counts,
+sessions, prompts, line changes, tokens, estimated cost, and model names. Best day,
+operating-system shares, category times, and dates appear when available.
+The all-time footer shows total time, active days, three historical languages,
+three tools, and key AI measurements. Complete historical tables remain in a
+separate drawer. Recent sections have no drawers or tables.
 
-The 7-day and 30-day sections start collapsed. Each opens to a graphic with
-the top five languages, top two tools, human and AI line additions and deletions,
-sessions, prompts, AI line changes, tokens, estimated cost, and model names.
-The footer includes the best day, operating-system shares, recent category times,
-period, and time zone when available. Recent sections do not include measurement tables.
+The generator writes three SVG assets: light and dark desktop images and one
+mobile image that inherits the page's color scheme. The mobile image stacks the
+recent columns. Screen-width queries and theme queries stay separate because
+signed-in GitHub can rewrite theme queries. This keeps desktop image selection
+correct. Obsolete generated images are removed when publishing.
 
-The all-time overview is always visible. It shows coding category hours and shares,
-the top five historical languages, top three tools, and AI activity. A separate
-Complete historical measurements drawer contains the full tables. No row limits
-are applied to the complete tables. The generator writes 15 SVG assets.
+The SVGs contain no scripts, external fonts, or network requests. Python's standard
+library generates them from the same three Stats responses. No additional API
+calls are needed. Preview runs leave the public README and images unchanged.
 
 Time totals include Other. Recent Stats ranges can exclude today. Each expanded
 section shows the provider's period and time zone. Missing measurements do not

@@ -16,7 +16,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 RANGES = {"last_7_days": "Last 7 days", "last_30_days": "Last 30 days", "all_time": "All time"}
-GRAPHIC_KINDS = ('summary', 'activity', 'week', 'month', 'history')
+GRAPHIC_KINDS = ('profile',)
 BREAKDOWNS = {"languages": "Languages", "editors": "Editors", "operating_systems": "Operating systems",
               "categories": "Activity categories"}
 # Desktop Codex sessions can also report source=vscode. Do not imply a VS Code install.
@@ -103,8 +103,7 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
                for name, colors in theme_colors.items()}
     width = 400 if compact else 760
     height = 660 if compact else 440
-    title = {'summary': 'Human experience. AI in practice.', 'activity': 'Recent coding activity',
-             'week': 'Last 7 days', 'month': 'Last 30 days', 'history': 'All-time coding record'}[kind]
+    title = 'Human and AI coding history and recent activity'
     root = ET.Element('svg', {
         'xmlns': 'http://www.w3.org/2000/svg', 'width': str(width), 'height': str(height),
         'viewBox': f'0 0 {width} {height}', 'role': 'img',
@@ -145,275 +144,163 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
             return 'Not available'
         return f'{value / 1000000000:.2f}B' if value >= 1000000000 else f'{value / 1000000:.2f}M' if value >= 1000000 else f'{value / 1000:.1f}K' if value >= 1000 else count(value)
 
-    background = box(1, 1, width - 2, height - 2, 'bg', 16, 'border')
-    label(32, 34, 'ONHATE · DEVELOPER ACTIVITY' if kind == 'summary' else 'WAKATIME · CODING ACTIVITY', 14, 'muted', 500)
+    background = box(1, 1, width - 2, 1, 'bg', 16, 'border')
+    defs = ET.SubElement(root, 'defs')
+    descriptions = []
 
-    if kind == 'summary':
-        defs = ET.SubElement(root, 'defs')
-        gradient = ET.SubElement(defs, 'linearGradient', id='banner-background')
-        for offset, color in (('0%', 'human_soft'), ('48%', 'bg'), ('100%', 'ai_soft')):
-            ET.SubElement(gradient, 'stop', {'offset': offset, 'stop-color': palette[color]})
-        # Insert the fill behind the content and retain the outer border.
-        root.insert(list(root).index(background) + 1, ET.Element('rect', {'x': '2', 'y': '2', 'width': str(width - 4),
-                                         'height': str(height - 4), 'rx': '15', 'fill': 'url(#banner-background)'}))
-        label(32, 78, 'Human experience.', 32, weight=600)
-        label(32, 113, 'AI in practice.', 32, weight=600)
-        label(32, 140, 'All-time tracked coding activity', 16, 'muted')
-        all_time = stats['all_time']
-        category_rows = all_time.get('categories')
-        categories = {row['name']: row.get('total_seconds') for row in (category_rows if isinstance(category_rows, list) else [])
-                      if isinstance(row, dict) and isinstance(row.get('name'), str)}
-        metric_description = []
-        for index, (category, heading, line_key, suffix, color) in enumerate((
-            ('Coding', 'Human coding', 'human_additions', 'lines added by hand', 'human'),
-            ('AI Coding', 'AI coding', 'ai_additions', 'lines added by AI', 'ai'),
-        )):
-            x = 32 if compact or index == 0 else 408
-            y = (199 + index * 144) if compact else 186
-            label(x, y, heading, 18, color, 500)
-            seconds = categories.get(category)
-            hours = f'{int(seconds // 3600):,}' if number(seconds) else 'Not available'
-            node = label(x, y + 48, hours, 44 if number(seconds) else 26, weight=600)
-            if number(seconds):
-                ET.SubElement(node, 'tspan', {'dx': '8', 'font-size': '18', 'font-weight': '400',
-                                              'fill': palette['muted']}).text = 'hrs'
-            lines = short_count(all_time.get(line_key))
-            label(x, y + 76, f'{lines} {suffix}' if lines != 'Not available' else f'{suffix}: Not available', 16, 'muted')
-            metric_description.append(f'{heading}: {hours} hrs; {lines} {suffix}.')
-        if compact:
-            rule(32, 305, 368, 305)
-        else:
-            rule(380, 169, 380, 271)
-        language_y = 455 if compact else 306
-        label(32, language_y, 'TOP LANGUAGES', 14, 'muted', 500)
-        label(width - 32, language_y, 'LAST 30 DAYS', 14, 'muted', 500, 'end')
-        language_rows = stats['last_30_days'].get('languages')
-        candidates = [row for row in (language_rows if isinstance(language_rows, list) else [])
-                      if isinstance(row, dict) and isinstance(row.get('name'), str)
-                      and number(row.get('percent')) and 0 < row['percent'] <= 100]
-        languages = sorted(candidates, key=lambda row: row['percent'], reverse=True)[:3]
-        if sum(row['percent'] for row in languages) > 100.1:
-            raise RuntimeError('WakaTime returned invalid language percentages. README kept.')
-        if languages:
-            colors = tuple(palette[f'language_{index}'] for index in (1, 2, 3))
-            segments = [(row['name'], row['percent'], colors[i]) for i, row in enumerate(languages)]
-            segments.append(('Remaining languages', max(0, 100 - sum(row['percent'] for row in languages)), palette['track']))
-            bar_width = width - 64
-            cursor = 32.0
-            for name, percent, color in segments:
-                segment_width = bar_width * percent / 100
-                if segment_width:
-                    node = box(cursor, language_y + 18, segment_width, 10, color)
-                    ET.SubElement(node, 'title').text = f'{name}: {percent:.1f}% of the last 30 days'
-                cursor += segment_width
-            for index, (name, percent, color) in enumerate(segments):
-                column = 0 if compact else index % 2
-                row = index if compact else index // 2
-                x = 32 + column * 352
-                y = language_y + 57 + row * 25
-                box(x, y - 10, 8, 8, color, 4)
-                shown_name = name if len(name) <= 20 else name[:19] + '…'
-                name_node = label(x + 16, y, shown_name, 15)
-                clip_id = f'language-name-{index}'
-                clip = ET.SubElement(defs, 'clipPath', id=clip_id)
-                ET.SubElement(clip, 'rect', {'x': str(x + 16), 'y': str(y - 17),
-                                           'width': str((width - 64 if compact else 320) - 80), 'height': '23'})
-                name_node.set('clip-path', f'url(#{clip_id})')
-                ET.SubElement(name_node, 'title').text = name
-                label(width - 32 if compact else x + 320, y, f'{percent:.1f}%', 15, 'muted', anchor='end')
-            description.text = ' '.join(metric_description) + ' Last 30 days: ' + '; '.join(f'{name} {percent:.1f}%' for name, percent, _ in segments)
-        else:
-            label(32, language_y + 43, 'No language percentages available', 16, 'muted')
-            description.text = ' '.join(metric_description) + ' Last-30-day language percentages unavailable.'
-        label(32, height - 22, 'WakaTime · Languages: last 30 days' if compact else 'WakaTime · All-time totals · Languages: last 30 days', 14, 'muted')
-    elif kind == 'activity':
-        label(32, 80, 'Recent coding activity.', 30, weight=600)
-        label(32, 109, 'Recent activity, with a longer view below', 16, 'muted')
-        descriptions = []
-        for index, key in enumerate(('last_7_days', 'last_30_days')):
-            data = stats[key]
-            x = 32 if compact or index == 0 else 408
-            y = 155 + (index * 185 if compact else 0)
-            span = width - 64 if compact else 320
-            label(x, y, RANGES[key], 18, weight=500)
-            total = duration(inclusive(data, 'total_seconds'))
-            average = duration(inclusive(data, 'daily_average'))
-            label(x, y + 46, total, 30, weight=600)
-            label(x, y + 75, f'{average} daily average', 16, 'muted')
-            active, days = data.get('days_minus_holidays'), data.get('days_including_holidays')
-            valid_days = number(days) and int(days) == days and 0 < days <= 31
-            valid_active = number(active) and int(active) == active
-            count_label = f'{count(active)} / {count(days)}' if valid_days and valid_active and active <= days else f'{count(active)} active' if valid_active else 'Not available'
-            label(x, y + 113, 'Active days', 14, 'muted')
-            label(x + span, y + 113, count_label, 14, anchor='end')
-            if valid_days and valid_active and active <= days:
-                block_width = (span - 3 * (int(days) - 1)) / days
-                for day in range(int(days)):
-                    box(x + day * (block_width + 3), y + 127, block_width, 12, 'human' if day < active else 'track', 2)
-            descriptions.append(f'{RANGES[key]}: {total}; {average} daily average; {count_label} days.')
-        y = 524 if compact else 326
-        box(32, y, width - 64, 87, 'soft', 10)
-        label(48, y + 25, 'ALL TIME', 14, 'muted', 500)
-        total = duration(inclusive(stats['all_time'], 'total_seconds'))
-        label(48 if compact else width - 48, y + (52 if compact else 28), total, 22, weight=500, anchor=None if compact else 'end')
-        lifetime_active = stats['all_time'].get('days_minus_holidays')
-        active_text = f' · {count(lifetime_active)} active days' if number(lifetime_active) else ''
-        label(48, y + (74 if compact else 62), duration(inclusive(stats['all_time'], 'daily_average')) + (' daily avg' if compact else ' daily average') + active_text, 14, 'muted')
-        description.text = ' '.join(descriptions) + f' All time: {total}. Blocks show counts, not dates.'
-    else:
-        key = {'week': 'last_7_days', 'month': 'last_30_days', 'history': 'all_time'}[kind]
-        data, historical = stats[key], kind == 'history'
-        defs = ET.SubElement(root, 'defs')
+    def fitted(x, y, value, available, size=14, color='ink', weight=400):
+        node = label(x, y, value, size, color, weight)
+        clip_id = f'text-{len(defs)}'
+        clip = ET.SubElement(defs, 'clipPath', id=clip_id)
+        ET.SubElement(clip, 'rect', {'x': str(x), 'y': str(y - size - 2),
+                                   'width': str(available), 'height': str(size + 8)})
+        node.set('clip-path', f'url(#{clip_id})')
+        ET.SubElement(node, 'title').text = str(value)
+        descriptions.append(str(value))
 
-        def fitted(x, y, value, available, size=14, color='ink', weight=400):
-            node = label(x, y, value, size, color, weight)
-            clip_id = f'detail-text-{len(defs)}'
-            clip = ET.SubElement(defs, 'clipPath', id=clip_id)
-            ET.SubElement(clip, 'rect', {'x': str(x), 'y': str(y - size - 2),
-                                       'width': str(available), 'height': str(size + 8)})
-            node.set('clip-path', f'url(#{clip_id})')
-            ET.SubElement(node, 'title').text = str(value)
+    def ranked(data, field, limit):
+        rows = data.get(field)
+        rows = rows if isinstance(rows, list) else []
+        rows = [row for row in rows if isinstance(row, dict) and isinstance(row.get('name'), str)]
+        return sorted(rows, key=lambda row: row.get('total_seconds') if number(row.get('total_seconds')) else -1, reverse=True)[:limit]
 
-        def ranked(field, limit):
-            rows = data.get(field)
-            rows = rows if isinstance(rows, list) else []
-            rows = [row for row in rows if isinstance(row, dict) and isinstance(row.get('name'), str)]
-            return sorted(rows, key=lambda row: row.get('total_seconds') if number(row.get('total_seconds')) else -1, reverse=True)[:limit]
+    def pair(x, y, name, value, span, color='muted'):
+        fitted(x, y, name, span * .62, 13, color)
+        label(x + span, y, value, 13, anchor='end')
+        descriptions.append(f'{name}: {value}.')
 
-        label(32, 77, title, 27, weight=600)
-        active = data.get('days_minus_holidays')
-        active_text = f'{count(active)} active days' if number(active) else 'Active days not available'
-        subtitle = f'All-time recorded activity · {active_text}' if historical else f'{active_text} · {duration(inclusive(data, "daily_average"))} daily average'
-        fitted(32, 105, subtitle, width - 64, 14, 'muted')
-        offset = 0
-        category_description = []
-        if historical:
-            label(32, 141, 'Coding history', 16, weight=500)
-            categories = data.get('categories')
-            categories = categories if isinstance(categories, list) else []
-            for index, category in enumerate(('Coding', 'AI Coding')):
-                row = next((row for row in categories if isinstance(row, dict) and row.get('name') == category), {})
-                y = 171 + 42 * index
-                label(32, y, category, 14)
-                percent = row.get('percent')
-                value = duration(row.get('total_seconds'))
-                if number(percent) and percent <= 100:
-                    value += f' · {percent:.2f}%'
-                    box(32, y + 10, width - 64, 7, 'track', 3)
-                    box(32, y + 10, (width - 64) * percent / 100, 7, 'human' if index == 0 else 'ai', 3)
-                label(width - 32, y, value, 14, 'muted', anchor='end')
-                category_description.append(f'{category}: {value}.')
-            offset = 132
-
-        language_y = 148 + offset
-        label(32, language_y, 'Historical language usage' if historical else 'Language focus', 16, weight=500)
-        languages = ranked('languages', 5)
-        language_span = width - 64 if compact else 396
-        language_description = []
-        if not languages:
-            label(32, language_y + 32, 'No language stats available', 14, 'muted')
-        for index, row in enumerate(languages):
-            y = language_y + 32 + index * 34
-            fitted(32, y, row['name'], language_span - 70, 14)
+    def languages(data, x, y, span, limit):
+        rows = ranked(data, 'languages', limit)
+        if not rows:
+            fitted(x, y, 'No language percentages available', span, 13, 'muted')
+            return y + 28
+        for row in rows:
             percent = row.get('percent')
             valid = number(percent) and percent <= 100
-            value = f'{percent:.1f}%' if valid else 'Not available'
-            label(32 + language_span, y, value, 14, 'muted', anchor='end')
+            pair(x, y, row['name'], f'{percent:.1f}%' if valid else 'Not available', span)
             if valid:
-                box(32, y + 10, language_span, 6, 'track', 3)
-                box(32, y + 10, language_span * percent / 100, 6, 'human', 3)
-            language_description.append(f'{row["name"]}: {value}.')
+                box(x, y + 9, span, 5, 'track', 2)
+                box(x, y + 9, span * percent / 100, 5, 'human', 2)
+            y += 33
+        return y
 
-        tools_x = 32 if compact else 480
-        tools_y = language_y + 225 if compact else language_y
-        tool_span = width - 64 if compact else width - tools_x - 32
-        label(tools_x, tools_y, 'Most-used tools' if historical else 'Tools', 16, weight=500)
-        editors = ranked('editors', 3 if historical else 2)
-        if not editors:
-            label(tools_x, tools_y + 32, 'No tool stats available', 14, 'muted')
-        for index, editor in enumerate(editors):
-            y = tools_y + 32 + index * 51
+    all_time = stats['all_time']
+    if compact:
+        label(32, 43, 'Human experience.', 23, weight=600)
+        label(32, 70, 'AI in practice.', 23, weight=600)
+    else:
+        label(32, 43, 'Human experience. AI in practice.', 27, weight=600)
+    label(32, 97 if compact else 70, 'All-time coding history', 14, 'muted')
+    span = width - 64 if compact else (width - 112) / 2
+    categories = all_time.get('categories')
+    categories = categories if isinstance(categories, list) else []
+    for index, (category, heading, prefix, color) in enumerate((
+        ('Coding', 'Human coding', 'human', 'human'),
+        ('AI Coding', 'AI coding', 'ai', 'ai'),
+    )):
+        x = 32 if compact else 32 + index * (span + 48)
+        y = 109 + (27 + index * 132 if compact else 0)
+        label(x, y, heading, 17, color, 500)
+        row = next((row for row in categories if isinstance(row, dict) and row.get('name') == category), {})
+        seconds = row.get('total_seconds')
+        hours = f'{int(seconds // 3600):,} hrs' if number(seconds) else 'Not available'
+        label(x, y + 39, hours, 31 if number(seconds) else 23, weight=600)
+        descriptions.append(f'{heading}: {duration(seconds)}.')
+        pair(x, y + 66, 'Lines added', short_count(all_time.get(prefix + '_additions')), span)
+        pair(x, y + 88, 'Lines deleted', short_count(all_time.get(prefix + '_deletions')), span)
+    y = 396 if compact else 237
+    rule(32, y, width - 32, y)
+    label(32, y + 35, 'Recent focus', 20, weight=600)
+    period_start = y + 73
+    ends = []
+    for index, key in enumerate(('last_7_days', 'last_30_days')):
+        data = stats[key]
+        x = 32 if compact else 32 + index * (span + 48)
+        y = period_start if not compact or index == 0 else ends[0] + 44
+        label(x, y, RANGES[key], 17, weight=500)
+        total = duration(inclusive(data, 'total_seconds'))
+        fitted(x, y + 37, total, span, 25, weight=600)
+        fitted(x, y + 62, duration(inclusive(data, 'daily_average')) + ' daily average', span, 13, 'muted')
+        active, days = data.get('days_minus_holidays'), data.get('days_including_holidays')
+        valid = number(days) and int(days) == days and 0 < days <= 31 and number(active) and int(active) == active and active <= days
+        active_text = f'{count(active)} / {count(days)} active days' if valid else f'{count(active)} active days' if number(active) else 'Active days not available'
+        fitted(x, y + 85, active_text, span, 13, 'muted')
+        if valid:
+            block_width = (span - 3 * (int(days) - 1)) / days
+            for day in range(int(days)):
+                box(x + day * (block_width + 3), y + 97, block_width, 8, 'human' if day < active else 'track', 2)
+        y += 142
+        languages(data, x, y, span, 5)
+        y += 5 * 33 + 19
+        tools_start = y
+        for editor in ranked(data, 'editors', 2):
             name = CODEX_DISPLAY_NAMES.get(editor['name'], editor['name'])
-            fitted(tools_x, y, name, tool_span, 14, weight=500)
-            value = duration(editor.get('total_seconds'))
-            if number(editor.get('percent')):
-                value += f' · {editor["percent"]:.1f}%'
-            fitted(tools_x, y + 19, value, tool_span, 12, 'muted')
-
-        ai_y = (tools_y + (208 if historical else 157)) if compact else language_y + 221
-        label(32, ai_y, 'Human and AI activity', 16, weight=500)
-        metric_description = []
-        panel_width = width - 64 if compact else (width - 76) / 2
-        for index, (prefix, name, color) in enumerate((('human', 'Human lines', 'human'), ('ai', 'AI lines', 'ai'))):
-            x = 32 if compact else 32 + index * (panel_width + 12)
-            y = ai_y + 17 + (index * 98 if compact else 0)
-            box(x, y, panel_width, 86, 'soft', 8)
-            label(x + 12, y + 23, name, 13, color, 500)
-            added, deleted = data.get(prefix + '_additions'), data.get(prefix + '_deletions')
-            fitted(x + 12, y + 52, short_count(added) + ' added', panel_width - 24, 21 if number(added) else 13, weight=500)
-            fitted(x + 12, y + 73, short_count(deleted) + ' deleted', panel_width - 24, 13, 'muted')
-            metric_description.append(f'{name}: {short_count(added)} added; {short_count(deleted)} deleted.')
-        cards_y = ai_y + (213 if compact else 115)
-        metrics = [('ai_sessions', 'AI sessions'), ('ai_prompt_events_total', 'Prompts'), ('ai_line_changes_total', 'AI lines changed')]
-        metric_width = (width - 88) / 3
-        for index, (field, name) in enumerate(metrics):
-            x = 32 + index * (metric_width + 12)
-            value = data.get(field)
-            display = short_count(value)
-            box(x, cards_y, metric_width, 70, 'soft', 8)
-            fitted(x + 12, cards_y + 30, display, metric_width - 24, 22 if number(value) else 12, weight=500)
-            fitted(x + 12, cards_y + 52, name, metric_width - 24, 10 if compact else 12, 'muted')
-            metric_description.append(f'{name}: {display}.')
-        y = cards_y + 101
-        for field, name in (('ai_input_tokens', 'Input tokens'), ('ai_output_tokens', 'Output tokens'),
-                            ('ai_model_total_cost', 'Estimated AI cost (USD)')):
+            pair(x, y, name, f'{editor["percent"]:.1f}%' if number(editor.get('percent')) else 'Not available', span)
+            y += 23
+        y = tools_start + 2 * 23 + 17
+        # Keep the same row positions in both recent columns, even for missing data.
+        for field, name, color in (
+            ('human_additions', 'Human lines added', 'human'), ('human_deletions', 'Human lines deleted', 'human'),
+            ('ai_additions', 'AI lines added', 'ai'), ('ai_deletions', 'AI lines deleted', 'ai'),
+            ('ai_sessions', 'AI sessions', 'muted'), ('ai_prompt_events_total', 'Prompts', 'muted'),
+            ('ai_line_changes_total', 'AI lines changed', 'muted'), ('ai_input_tokens', 'Input tokens', 'muted'),
+            ('ai_output_tokens', 'Output tokens', 'muted'), ('ai_model_total_cost', 'Estimated AI cost (USD)', 'muted'),
+        ):
             value = data.get(field)
             display = f'${value:,.2f}' if field == 'ai_model_total_cost' and number(value) else short_count(value)
-            label(32, y, name, 13, 'muted')
-            label(width - 32, y, display, 13, anchor='end')
-            metric_description.append(f'{name}: {display}.')
+            pair(x, y, name, display, span, color)
             y += 24
-        model_y = y + 11
-        model_names = [CODEX_DISPLAY_NAMES.get(row['name'], row['name']) for row in models_for(data)]
-        x, y = 32, model_y
-        for name in model_names[:5] + ([f'+{len(model_names) - 5} more'] if len(model_names) > 5 else []):
-            shown = name if len(name) <= 21 else name[:20] + '…'
-            chip_width = min(len(shown) * 9 + 24, width - 64)
-            if x + chip_width > width - 32:
-                x, y = 32, y + 29
-            box(x, y - 19, chip_width, 27, 'soft', 5)
-            fitted(x + 10, y, shown, chip_width - 20, 13, 'muted')
-            x += chip_width + 8
-        y += 37
+        models = [CODEX_DISPLAY_NAMES.get(row['name'], row['name']) for row in models_for(data)]
+        if models:
+            y += 10
+            fitted(x, y, ' · '.join(models[:4]) + (f' · +{len(models) - 4} more' if len(models) > 4 else ''), span, 12, 'muted')
+            y += 23
         best = data.get('best_day')
         if isinstance(best, dict) and isinstance(best.get('date'), str) and number(best.get('total_seconds')):
-            fitted(32, y, f'Best day · {best["date"][:10]} · {duration(best["total_seconds"])}', width - 64, 12, 'muted')
+            fitted(x, y, f'Best day · {best["date"][:10]} · {duration(best["total_seconds"])}', span, 12, 'muted')
             y += 23
-        systems = ranked('operating_systems', 3)
+        systems = ranked(data, 'operating_systems', 2)
         if systems:
-            summary = ' · '.join(row['name'] + (f' {row["percent"]:.1f}%' if number(row.get('percent')) else '') for row in systems)
-            fitted(32, y, summary, width - 64, 12, 'muted')
+            fitted(x, y, ' · '.join(row['name'] + (f' {row["percent"]:.1f}%' if number(row.get('percent')) else '') for row in systems), span, 12, 'muted')
             y += 23
-        if not historical:
-            categories = ranked('categories', 2)
-            for row in categories:
-                value = row['name'] + ' · ' + duration(row.get('total_seconds'))
-                if number(row.get('percent')):
-                    value += f' · {row["percent"]:.1f}%'
-                fitted(32, y, value, width - 64, 12, 'muted')
-                y += 23
+        for row in ranked(data, 'categories', 2):
+            fitted(x, y, row['name'] + ' · ' + duration(row.get('total_seconds')), span, 12, 'muted')
+            y += 23
         start, end = data.get('start'), data.get('end')
         if isinstance(start, str) and isinstance(end, str):
-            fitted(32, y, f'{start[:10]} to {end[:10]}', width - 64, 12, 'muted')
+            fitted(x, y, f'{start[:10]} to {end[:10]}', span, 12, 'muted')
             y += 23
-        if isinstance(data.get('timezone'), str):
-            fitted(32, y, data['timezone'], width - 64, 12, 'muted')
-            y += 23
-        height = int(y + 18)
-        root.set('height', str(height))
-        root.set('viewBox', f'0 0 {width} {height}')
-        background.set('height', str(height - 2))
-        description.text = title + '. ' + subtitle + '. ' + ' '.join(category_description + language_description + metric_description)
+        ends.append(y)
+    y = max(ends) + 12
+    rule(32, y, width - 32, y)
+    label(32, y + 35, 'All time', 20, weight=600)
+    lifetime = duration(inclusive(all_time, 'total_seconds'))
+    fitted(32, y + 65, lifetime + (f' · {count(all_time["days_minus_holidays"])} active days' if number(all_time.get('days_minus_holidays')) else ''), width - 64, 14, 'muted')
+    descriptions.append('All-time total: ' + lifetime)
+    history_y = y + 101
+    y = languages(all_time, 32, history_y, span, 3)
+    tools_y = y + 20 if compact else history_y
+    tools_x = 32 if compact else 32 + span + 48
+    for editor in ranked(all_time, 'editors', 3):
+        name = CODEX_DISPLAY_NAMES.get(editor['name'], editor['name'])
+        pair(tools_x, tools_y, name, f'{editor["percent"]:.1f}%' if number(editor.get('percent')) else 'Not available', span)
+        tools_y += 33
+    y = max(y, tools_y) + 18
+    for field, name in (('ai_sessions', 'AI sessions'), ('ai_prompt_events_total', 'Prompts'),
+                        ('ai_line_changes_total', 'AI lines changed'), ('ai_input_tokens', 'Input tokens'),
+                        ('ai_output_tokens', 'Output tokens'), ('ai_model_total_cost', 'Estimated AI cost (USD)')):
+        value = all_time.get(field)
+        display = f'${value:,.2f}' if field == 'ai_model_total_cost' and number(value) else short_count(value)
+        pair(32, y, name, display, width - 64)
+        y += 23
+    if isinstance(all_time.get('timezone'), str):
+        fitted(32, y + 10, all_time['timezone'], width - 64, 12, 'muted')
+        y += 23
+    height = int(y + 24)
+    root.set('height', str(height))
+    root.set('viewBox', f'0 0 {width} {height}')
+    background.set('height', str(height - 2))
+    description.text = ' '.join(descriptions) + ' Active-day blocks show counts, not dates.'
     for node in root.iter():
         if node.text:
             node.text = ''.join(char for char in node.text if ord(char) >= 32)
@@ -461,23 +348,16 @@ def fetch_data(path: str, token: str) -> dict:
 
 
 def render_stats(stats: dict) -> str:
-    lines = [graphic_picture('summary', 'Human and AI coding totals. Top language percentages from the last 30 days.'), '',
-             graphic_picture('activity', 'Recent coding activity: last 7 days, last 30 days, and all-time totals.'), '']
+    lines = ['## Coding activity', '', graphic_picture('profile', 'Human and AI coding history, last 7 and 30 days, and all-time summary.'), '']
     for key in RANGES:
         data = stats[key]
         if not isinstance(data, dict) or not number(inclusive(data, "total_seconds")):
             raise RuntimeError("WakaTime returned invalid totals. README kept.")
     for key, label in RANGES.items():
         data = stats[key]
-        if key == 'all_time':
-            lines += ['### All-time coding record', '', graphic_picture('history', 'All-time coding history, top languages, tools, and AI activity.'), '',
-                      '<details>', '<summary>Complete historical measurements</summary>', '']
-        else:
-            kind = 'week' if key == 'last_7_days' else 'month'
-            lines += ['<details>', f'<summary>{label}</summary>', '',
-                      graphic_picture(kind, f'{label}: top languages, tools, and AI activity.'), '',
-                      '</details>', '']
+        if key != 'all_time':
             continue
+        lines += ['<details>', '<summary>Complete historical measurements</summary>', '']
         lines += [
                   f"Period: {text(data.get('start', 'Not available'))} to {text(data.get('end', 'Not available'))}.",
                   f"Time zone: {text(data.get('timezone', 'Not available'))}.", ""]
@@ -539,6 +419,9 @@ def update_readme(path: Path, token: str, output: Path | None = None) -> None:
     target = output or path
     asset_dir = target.parent / 'assets'
     asset_dir.mkdir(exist_ok=True)
+    for old in asset_dir.glob('wakatime-*.svg'):
+        if old.name not in graphics:
+            old.unlink()
     for filename, content in graphics.items():
         (asset_dir / filename).write_text(content, encoding='utf-8')
     if target == path and updated == original:

@@ -61,32 +61,21 @@ class Response(io.BytesIO):
 
 
 class RenderTests(unittest.TestCase):
-    def test_all_time_overview_is_not_inside_a_collapsible(self):
+    def test_unified_image_is_visible_without_recent_drawers(self):
         output = waka.render_stats(sample_stats())
-        self.assertIn('### All-time coding record', output)
-        self.assertIn('wakatime-history-light.svg', output)
-        self.assertNotIn('<summary>All time: full stats</summary>', output)
+        self.assertIn('## Coding activity', output)
+        self.assertIn('wakatime-profile-light.svg', output)
+        self.assertEqual(output.count('<picture>'), 1)
+        self.assertLess(output.index('<picture>'), output.index('<details>'))
         self.assertIn('<summary>Complete historical measurements</summary>', output)
-        self.assertIn('<summary>Last 7 days</summary>', output)
-
-    def test_overview_uses_graphics_instead_of_a_table(self):
-        output = waka.render_stats(sample_stats())
-        self.assertIn('wakatime-summary-light.svg', output)
-        self.assertIn('wakatime-activity-mobile.svg', output)
-        self.assertNotIn('| Period |', output)
-        self.assertEqual(output.count('<picture>'), 5)
-
-    def test_recent_details_have_only_graphics(self):
-        output = waka.render_stats(sample_stats())
-        self.assertIn('wakatime-week-light.svg', output)
-        self.assertIn('wakatime-month-light.svg', output)
+        self.assertNotIn('<summary>Last 7 days', output)
+        self.assertNotIn('<summary>Last 30 days', output)
         self.assertNotIn('Extended measurements', output)
-        self.assertNotIn('#### Languages', output.split('### All-time coding record')[0])
 
     def test_requested_explanatory_text_is_not_rendered(self):
         output = waka.render_stats(sample_stats())
         self.assertNotIn('Time totals include Other. Missing measurements are not treated as zero.', output)
-        root = ET.fromstring(waka.render_graphic(sample_stats(), 'activity', 'light'))
+        root = ET.fromstring(waka.render_graphic(sample_stats(), 'profile', 'light'))
         visible = ' '.join(node.text or '' for node in root.findall('{http://www.w3.org/2000/svg}text'))
         self.assertNotIn('Time includes Other', visible)
         self.assertNotIn('Blocks show counts', visible)
@@ -102,7 +91,7 @@ class RenderTests(unittest.TestCase):
                     self.sources.append(dict(attrs))
 
         parser = Sources()
-        parser.feed(waka.graphic_picture('summary', 'Summary'))
+        parser.feed(waka.graphic_picture('profile', 'Summary'))
         mobile = [source for source in parser.sources if 'mobile' in source['srcset']]
         self.assertEqual(len(mobile), 1)
         self.assertIn('max-width', mobile[0]['media'])
@@ -291,9 +280,9 @@ class UpdateTests(unittest.TestCase):
         with patch.object(waka, "fetch_data", side_effect=payloads):
             waka.update_readme(self.path, "secret", output)
         self.assertEqual(self.path.read_bytes(), self.original.encode())
-        self.assertIn("wakatime-summary-light.svg", output.read_text())
+        self.assertIn("wakatime-profile-light.svg", output.read_text())
         images = list((preview_dir / 'assets').glob('wakatime-*.svg'))
-        self.assertEqual(len(images), 15)
+        self.assertEqual(len(images), 3)
         for image in images:
             self.assertTrue(ET.fromstring(image.read_text()).tag.endswith('svg'))
         self.assertFalse((self.path.parent / 'assets').exists())
@@ -304,18 +293,24 @@ class UpdateTests(unittest.TestCase):
         with patch.object(waka, "fetch_data", side_effect=payloads()):
             waka.update_readme(self.path, "secret")
         original_readme = self.path.read_bytes()
-        graphic = self.path.parent / 'assets/wakatime-summary-light.svg'
+        graphic = self.path.parent / 'assets/wakatime-profile-light.svg'
         original_graphic = graphic.read_bytes()
         graphic.write_text('stale image')
+        obsolete = graphic.parent / 'wakatime-week-dark.svg'
+        obsolete.write_text('old layout')
+        unrelated = graphic.parent / 'avatar.svg'
+        unrelated.write_text('keep')
         with patch.object(waka, "fetch_data", side_effect=payloads()):
             waka.update_readme(self.path, "secret")
         self.assertEqual(self.path.read_bytes(), original_readme)
         self.assertEqual(graphic.read_bytes(), original_graphic)
+        self.assertFalse(obsolete.exists())
+        self.assertEqual(unrelated.read_text(), 'keep')
 
     def test_preview_beside_readme_is_rejected_without_changing_public_assets(self):
         asset_dir = self.path.parent / 'assets'
         asset_dir.mkdir()
-        image = asset_dir / 'wakatime-summary-light.svg'
+        image = asset_dir / 'wakatime-profile-light.svg'
         image.write_text('published image')
         with patch.object(waka, 'fetch_data', side_effect=[{'data': value} for value in sample_stats().values()]):
             with self.assertRaises(RuntimeError):
@@ -340,15 +335,14 @@ class GraphicTests(unittest.TestCase):
             {'name': 'Other', 'total_seconds': 360, 'percent': 10},
         ]
 
-    def svg_text(self, kind='summary', theme='light', compact=False):
+    def svg_text(self, kind='profile', theme='light', compact=False):
         root = ET.fromstring(waka.render_graphic(self.stats, kind, theme, compact))
         return ' '.join(root.itertext())
 
     def test_summary_uses_all_time_totals_and_recent_languages(self):
         output = self.svg_text()
-        for value in ('10,749', '1,982', '11.54M', '1.26M', 'LAST 30 DAYS', 'Python', '50.0%', '25.0%', '15.0%', 'Remaining languages', '10.0%'):
+        for value in ('10,749', '1,982', '11.54M', '1.26M', 'Last 30 days', 'Python', '50.0%', '25.0%', '15.0%'):
             self.assertIn(value, output)
-        self.assertNotIn('YAML', output)
         self.assertNotIn('SECRET', output)
 
     def test_missing_measurements_do_not_become_zero(self):
@@ -375,18 +369,18 @@ class GraphicTests(unittest.TestCase):
         self.stats['all_time']['ai_additions'] = 0
         self.stats['all_time']['categories'][1]['total_seconds'] = 0
         output = self.svg_text()
-        self.assertIn('0 lines added by AI', output)
+        self.assertIn('Lines added: 0.', output)
         self.assertIn('0 hrs', output)
 
     def test_untrusted_language_names_are_xml_text(self):
         self.stats['last_30_days']['languages'][1]['name'] = '<script>alert("x")</script> & more'
-        output = waka.render_graphic(self.stats, 'summary', 'dark')
+        output = waka.render_graphic(self.stats, 'profile', 'dark')
         root = ET.fromstring(output)
         self.assertFalse(any(element.tag.endswith('script') for element in root.iter()))
         self.assertIn('&lt;script&gt;', output)
 
     def test_all_theme_and_layout_variants_are_accessible_svg(self):
-        for kind in ('summary', 'activity', 'week', 'month', 'history'):
+        for kind in ('profile',):
             for theme in ('light', 'dark'):
                 for compact in (False, True):
                     with self.subTest(kind=kind, theme=theme, compact=compact):
@@ -403,41 +397,35 @@ class GraphicTests(unittest.TestCase):
             {'name': f'Weekly {i}', 'percent': 10 - i, 'total_seconds': 100 - i} for i in range(7)
         ]
         self.stats['last_30_days']['languages'] = [{'name': 'Monthly language', 'percent': 90, 'total_seconds': 600}]
-        weekly = self.svg_text('week')
-        monthly = self.svg_text('month')
-        self.assertIn('Weekly 4', weekly)
-        self.assertNotIn('Weekly 5', weekly)
-        self.assertNotIn('Monthly language', weekly)
-        self.assertIn('Monthly language', monthly)
-        self.assertNotIn('Weekly 0', monthly)
-        self.assertIn('AI lines', weekly)
-        self.assertIn('added', weekly)
-        self.assertIn('AI sessions', weekly)
-        self.assertIn('Prompts', weekly)
+        output = self.svg_text()
+        self.assertIn('Weekly 4', output)
+        self.assertNotIn('Weekly 5', output)
+        self.assertIn('Monthly language', output)
+        self.assertLess(output.index('Weekly 0'), output.index('Monthly language'))
 
     def test_all_time_graphic_summarizes_history_and_preserves_full_lists_in_markdown(self):
         self.stats['all_time']['languages'] = [
             {'name': f'Historical {i}', 'percent': 10 - i, 'total_seconds': 100 - i} for i in range(7)
         ]
-        summary = self.svg_text('history')
-        self.assertIn('Historical 4', summary)
-        self.assertNotIn('Historical 5', summary)
+        summary = self.svg_text()
+        self.assertIn('Historical 2', summary)
+        self.assertNotIn('Historical 3', summary)
         self.assertIn('10,749 hrs 31 mins', summary)
         self.assertIn('1,982 hrs 58 mins', summary)
         self.assertIn('Historical 6', waka.render_stats(self.stats))
 
     def test_detail_images_summarize_measurements_without_private_fields(self):
-        for kind in ('week', 'month', 'history'):
+        for kind in ('profile',):
             with self.subTest(kind=kind):
                 output = self.svg_text(kind)
-                for expected in ('Human lines', 'AI lines', 'added', 'deleted', 'AI sessions',
+                for expected in ('Human lines added', 'AI lines added', 'Human lines deleted', 'AI lines deleted', 'AI sessions',
                                  'Prompts', 'AI lines changed', 'Input tokens', 'Output tokens',
                                  'Estimated AI cost', 'Best day', '2026-10-28', 'Mac', '100.0%'):
                     self.assertIn(expected, output)
                 self.assertNotIn('SECRET', output)
 
     def test_mobile_svg_handles_its_own_theme_without_scripts(self):
-        output = waka.render_graphic(self.stats, 'summary', 'auto', True)
+        output = waka.render_graphic(self.stats, 'profile', 'auto', True)
         root = ET.fromstring(output)
         style = root.find('{http://www.w3.org/2000/svg}style')
         self.assertIsNotNone(style)
@@ -449,11 +437,11 @@ class GraphicTests(unittest.TestCase):
         self.stats['last_7_days']['days_minus_holidays'] = 5
         self.stats['last_30_days']['days_minus_holidays'] = 26
         self.stats['last_30_days']['days_including_holidays'] = 30
-        output = self.svg_text('activity')
+        output = self.svg_text()
         self.assertIn('1 hr 30 mins', output)
         self.assertIn('5 / 7', output)
         self.assertIn('26 / 30', output)
-        self.assertIn('Blocks show counts, not dates', output)
+        self.assertIn('Active-day blocks show counts, not dates', output)
         self.assertNotIn('Your', output)
         self.assertNotIn(' I ', output)
 

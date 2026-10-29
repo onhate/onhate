@@ -1,41 +1,27 @@
-# Profile graphics
+# Unified coding activity graphic
 
-The user selected the Unified banner and Recent focus designs shown in this chat.
-The user also requested neutral headings with no pronouns and language percentages
-from the last 30 days.
+The user approved one image with one `## Coding activity` heading above it.
+It replaces the separate banner, activity graphic, and recent and historical images.
 
-Use equal space for human and AI coding in the banner. Show all-time Coding and
-AI Coding hours and the provider's human and AI added-line counts. Show the top
-three languages from `last_30_days`, with the remaining share in a separate segment.
-Label the language period explicitly. Keep the headline and composition from the
-selected preview.
+Use three areas in one border:
 
-Replace the overview table with Recent coding activity: 7-day and 30-day totals,
-daily averages, and active-day counts. Active-day blocks show counts, not dates.
-Put lifetime totals below those two periods.
+- Human and AI history: equal space for all-time category hours and line additions
+  and deletions. Keep the approved Human experience / AI in practice headline.
+- Recent focus: 7-day and 30-day columns with totals, averages, active-day counts,
+  five languages, two tools, line counts, sessions, prompts, tokens, estimated cost,
+  models, best day, operating-system shares, categories, and dates when available.
+- All time: a compact footer with total time, active days, three historical languages,
+  three tools, and key AI measurements. Avoid repeating the top line and hour metrics.
 
-The approved detail design uses top-five language bars, top-two tool summaries,
-three AI metrics, and model chips for each recent period. Recent sections start
-collapsed. The user subsequently requested removal of the recent measurement
-drawers and their tables. Keep only the graphics in those sections. Summarize
-the useful measurements in the images: equal human and AI line panels, sessions,
-prompts, AI line changes, tokens, estimated cost, best day, operating-system shares,
-and the provider period and time zone. Include recent category times in the footer.
+Stack columns on mobile. Use small internal labels and spacing instead of separate
+card borders and repeated headings. The recent views have no collapsible sections.
+Keep complete historical measurements in a separate drawer below the image.
+Use no personal pronouns in generated copy.
 
-Show the all-time overview outside any collapsible section. Include coding category
-hours and shares, five historical languages, three tools, and AI activity. Keep
-complete tables in a separate Complete historical measurements drawer.
+Generate three script-free SVG variants with the existing standard-library renderer.
+Keep screen-width and theme selection separate to preserve correct GitHub behavior.
+Remove obsolete generated assets on publication. Preview output stays isolated.
 
-Remove the visible activity footer and the note about Other and missing measurements.
-Keep measurement handling unchanged.
-
-Generate static SVGs with the Python standard library. Supply light and dark
-images and readable mobile layouts through GitHub-supported picture elements.
-The scheduled workflow must commit image changes even when Markdown is unchanged.
-Preview runs must include all images and must not change the public README.
-
-No new API calls, dependencies, services, project details, or machine details.
-Missing optional measurements must remain unavailable, not zero.
-
-Approaches considered: paired summary cards and period cards or daily-average
-bars for activity. The user selected the unified banner and Recent focus.
+Keep the same three API requests, privacy whitelist, Bearer authentication, retries,
+and missing-value rules. Add no dependencies or services. Omit project names,
+machine details, dependencies, and raw responses. Do not infer productivity.
