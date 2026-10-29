@@ -73,21 +73,20 @@ def table(headers, rows):
 
 def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) -> str:
     """Render the approved profile layouts as standalone, script-free SVGs."""
-    if kind not in ('summary', 'activity') or theme not in ('light', 'dark'):
+    if kind not in ('summary', 'activity') or theme not in ('light', 'dark', 'auto'):
         raise ValueError('Invalid graphic kind or theme')
     dark = theme == 'dark'
-    palette = {
-        'bg': '#0d1117' if dark else '#ffffff',
-        'ink': '#e6edf3' if dark else '#1f2328',
-        'muted': '#9198a1' if dark else '#59636e',
-        'border': '#30363d' if dark else '#d1d9e0',
-        'soft': '#161b22' if dark else '#f6f8fa',
-        'human': '#58a6ff' if dark else '#0969da',
-        'ai': '#bc8cff' if dark else '#8250df',
-        'human_soft': '#101c2d' if dark else '#f1f7ff',
-        'ai_soft': '#1c152b' if dark else '#f8f3ff',
-        'track': '#303943' if dark else '#e3e7eb',
+    theme_colors = {
+        'bg': ('#ffffff', '#0d1117'), 'ink': ('#1f2328', '#e6edf3'),
+        'muted': ('#59636e', '#9198a1'), 'border': ('#d1d9e0', '#30363d'),
+        'soft': ('#f6f8fa', '#161b22'), 'human': ('#0969da', '#58a6ff'),
+        'ai': ('#8250df', '#bc8cff'), 'human_soft': ('#f1f7ff', '#101c2d'),
+        'ai_soft': ('#f8f3ff', '#1c152b'), 'track': ('#e3e7eb', '#303943'),
+        'language_1': ('#3178c6', '#58a6ff'), 'language_2': ('#b35c00', '#f4a454'),
+        'language_3': ('#9a7b00', '#e3c84a'),
     }
+    palette = {name: f'var(--tone-{name})' if theme == 'auto' else colors[int(dark)]
+               for name, colors in theme_colors.items()}
     width = 400 if compact else 760
     height = 660 if compact else 440
     title = 'Human experience. AI in practice.' if kind == 'summary' else 'Recent coding activity'
@@ -99,6 +98,12 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
     })
     ET.SubElement(root, 'title', id='graphic-title').text = title
     description = ET.SubElement(root, 'desc', id='graphic-description')
+    if theme == 'auto':
+        # Embedded SVG inherits the page's color scheme. GitHub cannot rewrite
+        # these rules as it does a picture source's theme media condition.
+        light = ';'.join(f'--tone-{name}:{colors[0]}' for name, colors in theme_colors.items())
+        dark_colors = ';'.join(f'--tone-{name}:{colors[1]}' for name, colors in theme_colors.items())
+        ET.SubElement(root, 'style').text = f':root{{{light}}}@media (prefers-color-scheme: dark){{:root{{{dark_colors}}}}}'
 
     def label(x, y, value, size=16, color='ink', weight=400, anchor=None):
         attrs = {'x': str(x), 'y': str(y), 'font-size': str(size),
@@ -125,7 +130,7 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
             return 'Not available'
         return f'{value / 1000000:.2f}M' if value >= 1000000 else f'{value / 1000:.1f}K' if value >= 1000 else count(value)
 
-    box(1, 1, width - 2, height - 2, 'bg', 16, 'border')
+    background = box(1, 1, width - 2, height - 2, 'bg', 16, 'border')
     label(32, 34, 'ONHATE · DEVELOPER ACTIVITY' if kind == 'summary' else 'WAKATIME · CODING ACTIVITY', 14, 'muted', 500)
 
     if kind == 'summary':
@@ -134,7 +139,7 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
         for offset, color in (('0%', 'human_soft'), ('48%', 'bg'), ('100%', 'ai_soft')):
             ET.SubElement(gradient, 'stop', {'offset': offset, 'stop-color': palette[color]})
         # Insert the fill behind the content and retain the outer border.
-        root.insert(3, ET.Element('rect', {'x': '2', 'y': '2', 'width': str(width - 4),
+        root.insert(list(root).index(background) + 1, ET.Element('rect', {'x': '2', 'y': '2', 'width': str(width - 4),
                                          'height': str(height - 4), 'rx': '15', 'fill': 'url(#banner-background)'}))
         label(32, 78, 'Human experience.', 32, weight=600)
         label(32, 113, 'AI in practice.', 32, weight=600)
@@ -175,7 +180,7 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
         if sum(row['percent'] for row in languages) > 100.1:
             raise RuntimeError('WakaTime returned invalid language percentages. README kept.')
         if languages:
-            colors = ('#58a6ff' if dark else '#3178c6', '#f4a454' if dark else '#b35c00', '#e3c84a' if dark else '#9a7b00')
+            colors = tuple(palette[f'language_{index}'] for index in (1, 2, 3))
             segments = [(row['name'], row['percent'], colors[i]) for i, row in enumerate(languages)]
             segments.append(('Remaining languages', max(0, 100 - sum(row['percent'] for row in languages)), palette['track']))
             bar_width = width - 64
@@ -251,8 +256,7 @@ def graphic_picture(kind: str, alt: str) -> str:
     prefix = f'assets/wakatime-{kind}'
     return '\n'.join([
         '<picture>',
-        f'  <source media="(max-width: 540px) and (prefers-color-scheme: dark)" srcset="{prefix}-dark-mobile.svg">',
-        f'  <source media="(max-width: 540px)" srcset="{prefix}-light-mobile.svg">',
+        f'  <source media="(max-width: 540px)" srcset="{prefix}-mobile.svg">',
         f'  <source media="(prefers-color-scheme: dark)" srcset="{prefix}-dark.svg">',
         f'  <img alt="{html.escape(alt, quote=True)}" src="{prefix}-light.svg" width="760">',
         '</picture>',
@@ -355,8 +359,8 @@ def update_readme(path: Path, token: str, output: Path | None = None) -> None:
     stats = {key: fetch_data(f"stats/{key}", token)["data"] for key in RANGES}
     section = render_stats(stats)
     graphics = {
-        f'wakatime-{kind}-{theme}{"-mobile" if compact else ""}.svg': render_graphic(stats, kind, theme, compact)
-        for kind in ('summary', 'activity') for theme in ('light', 'dark') for compact in (False, True)
+        f'wakatime-{kind}{"-mobile" if compact else "-" + theme}.svg': render_graphic(stats, kind, theme, compact)
+        for kind in ('summary', 'activity') for theme, compact in (('light', False), ('dark', False), ('auto', True))
     }
     newline = "\r\n" if "\r\n" in original else "\n"
     section = ("\n\n" + section + "\n\n").replace("\n", newline)

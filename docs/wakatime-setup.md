@@ -39,7 +39,11 @@ language share use last-30-day percentages. Both periods are labeled explicitly.
 
 The Recent coding activity graphic compares 7-day and 30-day totals, daily averages,
 and active-day counts, with lifetime totals below. The blocks show counts, not dates.
-Each graphic has a light, dark, and narrow-screen layout. The SVGs contain no scripts,
+Each graphic has light and dark desktop images and one narrow-screen image that
+inherits the page's color scheme. Screen-width queries and theme queries stay
+separate: signed-in GitHub rewrites theme queries and can remove other conditions
+combined with them. This keeps the mobile image from being selected on desktop.
+The SVGs contain no scripts,
 external fonts, or network requests. Python's standard library generates them from
 the same three Stats responses. No additional API calls are needed.
 

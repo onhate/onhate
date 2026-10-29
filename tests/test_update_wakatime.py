@@ -1,6 +1,7 @@
 import copy
 import io
 import json
+from html.parser import HTMLParser
 from pathlib import Path
 import tempfile
 import unittest
@@ -68,9 +69,26 @@ class RenderTests(unittest.TestCase):
     def test_overview_uses_graphics_instead_of_a_table(self):
         output = waka.render_stats(sample_stats())
         self.assertIn('wakatime-summary-light.svg', output)
-        self.assertIn('wakatime-activity-dark-mobile.svg', output)
+        self.assertIn('wakatime-activity-mobile.svg', output)
         self.assertNotIn('| Period |', output)
         self.assertEqual(output.count('<picture>'), 2)
+
+    def test_mobile_image_condition_cannot_be_rewritten_as_a_theme_condition(self):
+        class Sources(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.sources = []
+
+            def handle_starttag(self, tag, attrs):
+                if tag == 'source':
+                    self.sources.append(dict(attrs))
+
+        parser = Sources()
+        parser.feed(waka.graphic_picture('summary', 'Summary'))
+        mobile = [source for source in parser.sources if 'mobile' in source['srcset']]
+        self.assertEqual(len(mobile), 1)
+        self.assertIn('max-width', mobile[0]['media'])
+        self.assertNotIn('prefers-color-scheme', mobile[0]['media'])
 
     def test_daily_activity_is_not_rendered(self):
         output = waka.render_stats(sample_stats())
@@ -257,7 +275,7 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(self.path.read_bytes(), self.original.encode())
         self.assertIn("wakatime-summary-light.svg", output.read_text())
         images = list((preview_dir / 'assets').glob('wakatime-*.svg'))
-        self.assertEqual(len(images), 8)
+        self.assertEqual(len(images), 6)
         for image in images:
             self.assertTrue(ET.fromstring(image.read_text()).tag.endswith('svg'))
         self.assertFalse((self.path.parent / 'assets').exists())
@@ -361,6 +379,15 @@ class GraphicTests(unittest.TestCase):
                         self.assertTrue(root.find('{http://www.w3.org/2000/svg}desc').text)
                         self.assertNotIn('foreignObject', output)
                         self.assertNotIn('SECRET', output)
+
+    def test_mobile_svg_handles_its_own_theme_without_scripts(self):
+        output = waka.render_graphic(self.stats, 'summary', 'auto', True)
+        root = ET.fromstring(output)
+        style = root.find('{http://www.w3.org/2000/svg}style')
+        self.assertIsNotNone(style)
+        self.assertIn('@media (prefers-color-scheme: dark)', style.text)
+        self.assertEqual(root.attrib['width'], '400')
+        self.assertNotIn('<script', output)
 
     def test_recent_activity_uses_provider_days_and_inclusive_time(self):
         self.stats['last_7_days']['days_minus_holidays'] = 5

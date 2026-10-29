@@ -7,15 +7,13 @@
 <!--START_SECTION:waka-->
 
 <picture>
-  <source media="(max-width: 540px) and (prefers-color-scheme: dark)" srcset="assets/wakatime-summary-dark-mobile.svg">
-  <source media="(max-width: 540px)" srcset="assets/wakatime-summary-light-mobile.svg">
+  <source media="(max-width: 540px)" srcset="assets/wakatime-summary-mobile.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-summary-dark.svg">
   <img alt="Human and AI coding totals. Top language percentages from the last 30 days." src="assets/wakatime-summary-light.svg" width="760">
 </picture>
 
 <picture>
-  <source media="(max-width: 540px) and (prefers-color-scheme: dark)" srcset="assets/wakatime-activity-dark-mobile.svg">
-  <source media="(max-width: 540px)" srcset="assets/wakatime-activity-light-mobile.svg">
+  <source media="(max-width: 540px)" srcset="assets/wakatime-activity-mobile.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-activity-dark.svg">
   <img alt="Recent coding activity: last 7 days, last 30 days, and all-time totals." src="assets/wakatime-activity-light.svg" width="760">
 </picture>
