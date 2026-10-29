@@ -2,7 +2,6 @@
 """Update the WakaTime README section with Python's standard library."""
 
 import argparse
-from datetime import datetime, timedelta
 import html
 import json
 import math
@@ -13,9 +12,7 @@ import sys
 import tempfile
 import time
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 RANGES = {"last_7_days": "Last 7 days", "last_30_days": "Last 30 days", "all_time": "All time"}
 BREAKDOWNS = {"languages": "Languages", "editors": "Editors", "operating_systems": "Operating systems",
@@ -85,10 +82,9 @@ def fetch_data(path: str, token: str) -> dict:
             if not isinstance(payload, dict) or payload.get("error") or payload.get("errors"):
                 raise RuntimeError("WakaTime returned an error payload. README kept.")
             data = payload.get("data")
-            expected_type = dict if path.startswith("stats/") else list
-            if not isinstance(data, expected_type):
+            if not isinstance(data, dict):
                 raise RuntimeError("WakaTime returned invalid data. README kept.")
-            if status == 200 and (expected_type is list or data.get("is_up_to_date") is True):
+            if status == 200 and data.get("is_up_to_date") is True:
                 return payload
         except HTTPError as error:
             error.close()
@@ -103,7 +99,7 @@ def fetch_data(path: str, token: str) -> dict:
     raise RuntimeError("WakaTime data is unavailable or stale after four attempts. README kept.")
 
 
-def render_stats(stats: dict, summaries: dict) -> str:
+def render_stats(stats: dict) -> str:
     lines = ["### Coding activity", "", "Time totals include Other. Missing measurements are not treated as zero.", ""]
     overview = []
     for key, label in RANGES.items():
@@ -156,21 +152,7 @@ def render_stats(stats: dict, summaries: dict) -> str:
                              f"${model['cost']:,.4f}" if number(model.get("cost")) else "Not available"])
             lines += [table(["AI model", "Lines changed", "Estimated cost (USD)"], rows), ""]
         lines += ["</details>", ""]
-    daily = summaries.get("data")
-    if not isinstance(daily, list):
-        raise RuntimeError("WakaTime returned invalid daily summaries. README kept.")
-    rows = []
-    for day in daily:
-        if not isinstance(day, dict):
-            raise RuntimeError("WakaTime returned an invalid daily summary. README kept.")
-        date = (day.get("range") or {}).get("date")
-        seconds = (day.get("grand_total") or {}).get("total_seconds")
-        if not isinstance(date, str) or not number(seconds):
-            raise RuntimeError("WakaTime returned an incomplete daily summary. README kept.")
-        rows.append([text(date), duration(seconds)])
-    lines += ["<details>", "<summary>Daily activity: last 30 calendar days (includes today)</summary>", "",
-              table(["Date", "Time"], rows) if rows else "No daily summaries available.", "", "</details>", "",
-              "Source: [WakaTime](https://wakatime.com/@onhate). AI costs are estimates. "
+    lines += ["Source: [WakaTime](https://wakatime.com/@onhate). AI costs are estimates. "
               "Recent totals follow WakaTime's date ranges and can exclude today."]
     return "\n".join(lines)
 
@@ -182,14 +164,7 @@ def update_readme(path: Path, token: str, output: Path | None = None) -> None:
     if original.count(START) != 1 or original.count(END) != 1 or original.index(START) >= original.index(END):
         raise RuntimeError("README must have one ordered pair of WakaTime section markers.")
     stats = {key: fetch_data(f"stats/{key}", token)["data"] for key in RANGES}
-    try:
-        zone = ZoneInfo(stats["last_30_days"]["timezone"])
-    except (KeyError, TypeError, ValueError, ZoneInfoNotFoundError):
-        raise RuntimeError("WakaTime returned an invalid time zone. README kept.") from None
-    today = datetime.now(zone).date()
-    query = urlencode({"start": (today - timedelta(days=29)).isoformat(), "end": today.isoformat()})
-    summaries = fetch_data(f"summaries?{query}", token)
-    section = render_stats(stats, summaries)
+    section = render_stats(stats)
     newline = "\r\n" if "\r\n" in original else "\n"
     section = ("\n\n" + section + "\n\n").replace("\n", newline)
     updated = original[:original.index(START) + len(START)] + section + original[original.index(END):]

@@ -8,7 +8,7 @@ The daily schedule runs at 00:00 UTC (21:00 in São Paulo).
 Get a personal token at [WakaTime OAuth](https://wakatime.com/oauth). Save it as
 `WAKATIME_ACCESS_TOKEN` in the repository's
 [Actions secrets](https://github.com/onhate/onhate/settings/secrets/actions).
-Allow `read_stats` and `read_summaries` if WakaTime asks for scopes. Check the
+Allow `read_stats` if WakaTime asks for scopes. Check the
 token's expiry during setup. Replace the secret if the token expires or is revoked.
 
 GitHub does not let a script read back a saved repository secret. The Actions
@@ -34,7 +34,6 @@ pull requests run tests only. The workflow commits only README.md when it change
 The overview compares 7 days, 30 days, and all time. Each period has an expandable
 section with the returned languages, editors, operating systems, categories,
 and AI measurements. No language filters or row limits are applied.
-The daily section shows 30 calendar days, including today, in the account's time zone.
 
 Time totals include Other. Recent Stats ranges can exclude today. Each expanded
 section shows the provider's period and time zone. Missing measurements do not

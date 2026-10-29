@@ -52,13 +52,6 @@ def sample_stats():
     return {key: copy.deepcopy(data) for key in ("last_7_days", "last_30_days", "all_time")}
 
 
-SUMMARIES = {"data": [{
-    "range": {"date": "2026-10-29"},
-    "grand_total": {"total_seconds": 5400},
-    "projects": [{"name": "SECRET_DAILY_PROJECT"}],
-}]}
-
-
 class Response(io.BytesIO):
     def __init__(self, payload, status=200):
         super().__init__(json.dumps(payload).encode())
@@ -66,6 +59,11 @@ class Response(io.BytesIO):
 
 
 class RenderTests(unittest.TestCase):
+    def test_daily_activity_is_not_rendered(self):
+        output = waka.render_stats(sample_stats())
+        self.assertNotIn("Daily activity", output)
+        self.assertNotIn("| Date |", output)
+
     def test_codex_source_labels_are_displayed_as_codex_without_changing_values(self):
         stats = sample_stats()
         stats["last_7_days"]["editors"] = [
@@ -73,7 +71,7 @@ class RenderTests(unittest.TestCase):
             {"name": "VS Code", "total_seconds": 1800, "percent": 33.33},
         ]
         stats["last_7_days"]["ai_model_breakdown"] = [{"name": "Codex-Vscode", "lines": 30, "cost": 0.1234}]
-        output = waka.render_stats(stats, SUMMARIES)
+        output = waka.render_stats(stats)
         self.assertIn("| Codex | 1 hr 0 mins | 66.67% |", output)
         self.assertIn("| VS Code | 30 mins | 33.33% |", output)
         self.assertIn("| Codex | 30 | $0.1234 |", output)
@@ -86,12 +84,12 @@ class RenderTests(unittest.TestCase):
         stats["all_time"].pop("ai_model_breakdown")
         stats["all_time"]["ai_model_line_changes"] = {"Codex-Vscode": 8}
         stats["all_time"]["ai_model_costs"] = {"Codex-Vscode": 0.25}
-        output = waka.render_stats(stats, SUMMARIES)
+        output = waka.render_stats(stats)
         self.assertIn("| Codex | 8 | $0.2500 |", output)
         self.assertNotIn("Codex-Vscode", output)
 
     def test_inclusive_totals_and_all_languages_after_other(self):
-        output = waka.render_stats(sample_stats(), SUMMARIES)
+        output = waka.render_stats(sample_stats())
         self.assertIn("1 hr 30 mins", output)
         self.assertIn("YAML", output)
         self.assertIn("Other", output)
@@ -100,19 +98,19 @@ class RenderTests(unittest.TestCase):
         self.assertIn("16.67%", output)
 
     def test_private_fields_never_reach_readme(self):
-        output = waka.render_stats(sample_stats(), SUMMARIES)
+        output = waka.render_stats(sample_stats())
         self.assertNotIn("SECRET", output)
         self.assertNotIn("192.0.2.1", output)
 
     def test_dependencies_are_omitted_because_they_can_contain_internal_project_names(self):
         stats = sample_stats()
         stats["last_7_days"]["dependencies"] = [{"name": "PRIVATE_PACKAGE", "total_seconds": 120, "percent": 5}]
-        output = waka.render_stats(stats, SUMMARIES)
+        output = waka.render_stats(stats)
         self.assertNotIn("PRIVATE_PACKAGE", output)
         self.assertNotIn("Dependencies", output)
 
     def test_ai_measurements_and_cost_are_not_inferred(self):
-        output = waka.render_stats(sample_stats(), SUMMARIES)
+        output = waka.render_stats(sample_stats())
         for value in ("12,000", "800", "$0.1234", "Test Model", "960", "110"):
             self.assertIn(value, output)
         self.assertIn("AI lines added", output)
@@ -124,14 +122,14 @@ class RenderTests(unittest.TestCase):
         for data in stats.values():
             data.pop("ai_input_tokens")
             data["ai_output_tokens"] = 0
-        output = waka.render_stats(stats, SUMMARIES)
+        output = waka.render_stats(stats)
         self.assertNotIn("Input tokens", output)
         self.assertIn("| Output tokens | 0 |", output)
 
     def test_untrusted_names_cannot_inject_markdown_or_html(self):
         stats = sample_stats()
         stats["all_time"]["languages"][0]["name"] = "<img src=x>|[click](bad)\n# Heading"
-        output = waka.render_stats(stats, SUMMARIES)
+        output = waka.render_stats(stats)
         self.assertNotIn("<img", output)
         self.assertNotIn("[click](bad)", output)
         self.assertNotIn("\n# Heading", output)
@@ -201,23 +199,24 @@ class UpdateTests(unittest.TestCase):
         self.path.write_bytes(self.original.encode())
 
     def test_replaces_only_marked_section(self):
-        payloads = [{"data": value} for value in sample_stats().values()] + [SUMMARIES]
-        with patch.object(waka, "fetch_data", side_effect=payloads):
+        payloads = [{"data": value} for value in sample_stats().values()]
+        with patch.object(waka, "fetch_data", side_effect=payloads) as fetch:
             waka.update_readme(self.path, "secret")
+        self.assertEqual([call.args[0] for call in fetch.call_args_list], ["stats/last_7_days", "stats/last_30_days", "stats/all_time"])
         output = self.path.read_bytes().decode()
         self.assertTrue(output.startswith("Greeting\r\n<!--START_SECTION:waka-->"))
         self.assertTrue(output.endswith("<!--END_SECTION:waka-->\r\nFooter\r\n"))
         self.assertNotIn("\r\nold\r\n", output)
 
     def test_failed_final_request_leaves_readme_unchanged(self):
-        payloads = [{"data": value} for value in sample_stats().values()] + [RuntimeError("API failed")]
+        payloads = [{"data": value} for value in list(sample_stats().values())[:2]] + [RuntimeError("API failed")]
         with patch.object(waka, "fetch_data", side_effect=payloads):
             with self.assertRaises(RuntimeError):
                 waka.update_readme(self.path, "secret")
         self.assertEqual(self.path.read_bytes(), self.original.encode())
 
     def test_invalid_data_leaves_readme_unchanged(self):
-        payloads = [{"data": value} for value in sample_stats().values()] + [{"data": [{}]}]
+        payloads = [{"data": value} for value in list(sample_stats().values())[:2]] + [{"data": {"is_up_to_date": True}}]
         with patch.object(waka, "fetch_data", side_effect=payloads):
             with self.assertRaises(RuntimeError):
                 waka.update_readme(self.path, "secret")
@@ -237,7 +236,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_preview_writes_output_without_changing_readme(self):
         output = self.path.parent / "preview.md"
-        payloads = [{"data": value} for value in sample_stats().values()] + [SUMMARIES]
+        payloads = [{"data": value} for value in sample_stats().values()]
         with patch.object(waka, "fetch_data", side_effect=payloads):
             waka.update_readme(self.path, "secret", output)
         self.assertEqual(self.path.read_bytes(), self.original.encode())
