@@ -47,10 +47,14 @@ The SVGs contain no scripts,
 external fonts, or network requests. Python's standard library generates them from
 the same three Stats responses. No additional API calls are needed.
 
-Each period has an expandable
-section with the returned languages, editors, operating systems, categories,
-and AI measurements. No language filters or row limits are applied.
-The all-time section is open by default. The recent sections start collapsed.
+The 7-day and 30-day sections start collapsed. Each opens to a graphic with
+the top five languages, top two tools, AI additions, sessions, prompts, and model
+names. An Extended measurements drawer contains the complete returned tables.
+
+The all-time overview is always visible. It shows coding category hours and shares,
+the top five historical languages, top three tools, and AI activity. A separate
+Complete historical measurements drawer contains the full tables. No row limits
+are applied to the complete tables. The generator writes 15 SVG assets.
 
 Time totals include Other. Recent Stats ranges can exclude today. Each expanded
 section shows the provider's period and time zone. Missing measurements do not

@@ -16,6 +16,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 RANGES = {"last_7_days": "Last 7 days", "last_30_days": "Last 30 days", "all_time": "All time"}
+GRAPHIC_KINDS = ('summary', 'activity', 'week', 'month', 'history')
 BREAKDOWNS = {"languages": "Languages", "editors": "Editors", "operating_systems": "Operating systems",
               "categories": "Activity categories"}
 # Desktop Codex sessions can also report source=vscode. Do not imply a VS Code install.
@@ -71,9 +72,22 @@ def table(headers, rows):
     ])
 
 
+def models_for(data):
+    models = data.get('ai_model_breakdown')
+    if not models:
+        changes, costs = data.get('ai_model_line_changes') or {}, data.get('ai_model_costs') or {}
+        if not isinstance(changes, dict) or not isinstance(costs, dict):
+            raise RuntimeError('WakaTime returned invalid AI model data. README kept.')
+        models = [{'name': name, 'lines': changes.get(name), 'cost': costs.get(name)}
+                  for name in sorted(set(changes) | set(costs))]
+    if not isinstance(models, list) or any(not isinstance(row, dict) or not isinstance(row.get('name'), str) for row in models):
+        raise RuntimeError('WakaTime returned invalid AI model data. README kept.')
+    return models
+
+
 def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) -> str:
     """Render the approved profile layouts as standalone, script-free SVGs."""
-    if kind not in ('summary', 'activity') or theme not in ('light', 'dark', 'auto'):
+    if kind not in GRAPHIC_KINDS or theme not in ('light', 'dark', 'auto'):
         raise ValueError('Invalid graphic kind or theme')
     dark = theme == 'dark'
     theme_colors = {
@@ -89,7 +103,8 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
                for name, colors in theme_colors.items()}
     width = 400 if compact else 760
     height = 660 if compact else 440
-    title = 'Human experience. AI in practice.' if kind == 'summary' else 'Recent coding activity'
+    title = {'summary': 'Human experience. AI in practice.', 'activity': 'Recent coding activity',
+             'week': 'Last 7 days', 'month': 'Last 30 days', 'history': 'All-time coding record'}[kind]
     root = ET.Element('svg', {
         'xmlns': 'http://www.w3.org/2000/svg', 'width': str(width), 'height': str(height),
         'viewBox': f'0 0 {width} {height}', 'role': 'img',
@@ -211,7 +226,7 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
             label(32, language_y + 43, 'No language percentages available', 16, 'muted')
             description.text = ' '.join(metric_description) + ' Last-30-day language percentages unavailable.'
         label(32, height - 22, 'WakaTime · Languages: last 30 days' if compact else 'WakaTime · All-time totals · Languages: last 30 days', 14, 'muted')
-    else:
+    elif kind == 'activity':
         label(32, 80, 'Recent coding activity.', 30, weight=600)
         label(32, 109, 'Recent activity, with a longer view below', 16, 'muted')
         descriptions = []
@@ -244,8 +259,117 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
         lifetime_active = stats['all_time'].get('days_minus_holidays')
         active_text = f' · {count(lifetime_active)} active days' if number(lifetime_active) else ''
         label(48, y + (74 if compact else 62), duration(inclusive(stats['all_time'], 'daily_average')) + (' daily avg' if compact else ' daily average') + active_text, 14, 'muted')
-        label(32, height - 21, 'Time includes Other · Blocks show counts, not dates', 14, 'muted')
         description.text = ' '.join(descriptions) + f' All time: {total}. Blocks show counts, not dates.'
+    else:
+        key = {'week': 'last_7_days', 'month': 'last_30_days', 'history': 'all_time'}[kind]
+        data, historical = stats[key], kind == 'history'
+        defs = ET.SubElement(root, 'defs')
+
+        def fitted(x, y, value, available, size=14, color='ink', weight=400):
+            node = label(x, y, value, size, color, weight)
+            clip_id = f'detail-text-{len(defs)}'
+            clip = ET.SubElement(defs, 'clipPath', id=clip_id)
+            ET.SubElement(clip, 'rect', {'x': str(x), 'y': str(y - size - 2),
+                                       'width': str(available), 'height': str(size + 8)})
+            node.set('clip-path', f'url(#{clip_id})')
+            ET.SubElement(node, 'title').text = str(value)
+
+        def ranked(field, limit):
+            rows = data.get(field)
+            rows = rows if isinstance(rows, list) else []
+            rows = [row for row in rows if isinstance(row, dict) and isinstance(row.get('name'), str)]
+            return sorted(rows, key=lambda row: row.get('total_seconds') if number(row.get('total_seconds')) else -1, reverse=True)[:limit]
+
+        label(32, 77, title, 27, weight=600)
+        active = data.get('days_minus_holidays')
+        active_text = f'{count(active)} active days' if number(active) else 'Active days not available'
+        subtitle = f'All-time recorded activity · {active_text}' if historical else f'{active_text} · {duration(inclusive(data, "daily_average"))} daily average'
+        fitted(32, 105, subtitle, width - 64, 14, 'muted')
+        offset = 0
+        category_description = []
+        if historical:
+            label(32, 141, 'Coding history', 16, weight=500)
+            categories = data.get('categories')
+            categories = categories if isinstance(categories, list) else []
+            for index, category in enumerate(('Coding', 'AI Coding')):
+                row = next((row for row in categories if isinstance(row, dict) and row.get('name') == category), {})
+                y = 171 + 42 * index
+                label(32, y, category, 14)
+                percent = row.get('percent')
+                value = duration(row.get('total_seconds'))
+                if number(percent) and percent <= 100:
+                    value += f' · {percent:.2f}%'
+                    box(32, y + 10, width - 64, 7, 'track', 3)
+                    box(32, y + 10, (width - 64) * percent / 100, 7, 'human' if index == 0 else 'ai', 3)
+                label(width - 32, y, value, 14, 'muted', anchor='end')
+                category_description.append(f'{category}: {value}.')
+            offset = 132
+
+        language_y = 148 + offset
+        label(32, language_y, 'Historical language usage' if historical else 'Language focus', 16, weight=500)
+        languages = ranked('languages', 5)
+        language_span = width - 64 if compact else 396
+        language_description = []
+        if not languages:
+            label(32, language_y + 32, 'No language stats available', 14, 'muted')
+        for index, row in enumerate(languages):
+            y = language_y + 32 + index * 34
+            fitted(32, y, row['name'], language_span - 70, 14)
+            percent = row.get('percent')
+            valid = number(percent) and percent <= 100
+            value = f'{percent:.1f}%' if valid else 'Not available'
+            label(32 + language_span, y, value, 14, 'muted', anchor='end')
+            if valid:
+                box(32, y + 10, language_span, 6, 'track', 3)
+                box(32, y + 10, language_span * percent / 100, 6, 'human', 3)
+            language_description.append(f'{row["name"]}: {value}.')
+
+        tools_x = 32 if compact else 480
+        tools_y = language_y + 225 if compact else language_y
+        tool_span = width - 64 if compact else width - tools_x - 32
+        label(tools_x, tools_y, 'Most-used tools' if historical else 'Tools', 16, weight=500)
+        editors = ranked('editors', 3 if historical else 2)
+        if not editors:
+            label(tools_x, tools_y + 32, 'No tool stats available', 14, 'muted')
+        for index, editor in enumerate(editors):
+            y = tools_y + 32 + index * 51
+            name = CODEX_DISPLAY_NAMES.get(editor['name'], editor['name'])
+            fitted(tools_x, y, name, tool_span, 14, weight=500)
+            value = duration(editor.get('total_seconds'))
+            if number(editor.get('percent')):
+                value += f' · {editor["percent"]:.1f}%'
+            fitted(tools_x, y + 19, value, tool_span, 12, 'muted')
+
+        ai_y = (tools_y + (208 if historical else 157)) if compact else language_y + 221
+        label(32, ai_y, 'AI activity across recorded history' if historical else 'AI activity', 16, weight=500)
+        metrics = [('ai_sessions', 'AI sessions'), ('ai_prompt_events_total', 'Prompts'), ('ai_additions', 'AI lines added')]
+        if not historical:
+            metrics = [metrics[2], metrics[0], metrics[1]]
+        metric_width = (width - 88) / 3
+        metric_description = []
+        for index, (field, name) in enumerate(metrics):
+            x = 32 + index * (metric_width + 12)
+            value = data.get(field)
+            display = short_count(value) if field == 'ai_additions' else count(value) if number(value) else 'Not available'
+            box(x, ai_y + 17, metric_width, 70, 'soft', 8)
+            fitted(x + 12, ai_y + 47, display, metric_width - 24, 22 if number(value) else 13, weight=500)
+            fitted(x + 12, ai_y + 69, name, metric_width - 24, 12, 'muted')
+            metric_description.append(f'{name}: {display}.')
+        model_names = [CODEX_DISPLAY_NAMES.get(row['name'], row['name']) for row in models_for(data)]
+        x, y = 32, ai_y + 118
+        for name in model_names[:5] + ([f'+{len(model_names) - 5} more'] if len(model_names) > 5 else []):
+            shown = name if len(name) <= 21 else name[:20] + '…'
+            chip_width = min(len(shown) * 9 + 24, width - 64)
+            if x + chip_width > width - 32:
+                x, y = 32, y + 29
+            box(x, y - 19, chip_width, 27, 'soft', 5)
+            fitted(x + 10, y, shown, chip_width - 20, 13, 'muted')
+            x += chip_width + 8
+        height = int(y + 31)
+        root.set('height', str(height))
+        root.set('viewBox', f'0 0 {width} {height}')
+        background.set('height', str(height - 2))
+        description.text = title + '. ' + subtitle + '. ' + ' '.join(category_description + language_description + metric_description)
     for node in root.iter():
         if node.text:
             node.text = ''.join(char for char in node.text if ord(char) >= 32)
@@ -294,15 +418,22 @@ def fetch_data(path: str, token: str) -> dict:
 
 def render_stats(stats: dict) -> str:
     lines = [graphic_picture('summary', 'Human and AI coding totals. Top language percentages from the last 30 days.'), '',
-             graphic_picture('activity', 'Recent coding activity: last 7 days, last 30 days, and all-time totals.'), '',
-             'Time totals include Other. Missing measurements are not treated as zero.', '']
+             graphic_picture('activity', 'Recent coding activity: last 7 days, last 30 days, and all-time totals.'), '']
     for key in RANGES:
         data = stats[key]
         if not isinstance(data, dict) or not number(inclusive(data, "total_seconds")):
             raise RuntimeError("WakaTime returned invalid totals. README kept.")
     for key, label in RANGES.items():
         data = stats[key]
-        lines += ["<details open>" if key == 'all_time' else "<details>", f"<summary>{label}: full stats</summary>", "",
+        if key == 'all_time':
+            lines += ['### All-time coding record', '', graphic_picture('history', 'All-time coding history, top languages, tools, and AI activity.'), '',
+                      '<details>', '<summary>Complete historical measurements</summary>', '']
+        else:
+            kind = 'week' if key == 'last_7_days' else 'month'
+            lines += ['<details>', f'<summary>{label}</summary>', '',
+                      graphic_picture(kind, f'{label}: top languages, tools, and AI activity.'), '',
+                      '<details>', '<summary>Extended measurements</summary>', '']
+        lines += [
                   f"Period: {text(data.get('start', 'Not available'))} to {text(data.get('end', 'Not available'))}.",
                   f"Time zone: {text(data.get('timezone', 'Not available'))}.", ""]
         best = data.get("best_day") or {}
@@ -328,12 +459,7 @@ def render_stats(stats: dict) -> str:
             if number(value):
                 rows.append([title, f"${value:,.4f}" if field == "ai_model_total_cost" else count(value)])
         lines += [table(["Measurement", "Value"], rows) if rows else "No AI or human line measurements available.", ""]
-        models = data.get("ai_model_breakdown")
-        if not models:
-            changes = data.get("ai_model_line_changes") or {}
-            costs = data.get("ai_model_costs") or {}
-            models = [{"name": name, "lines": changes.get(name), "cost": costs.get(name)}
-                      for name in sorted(set(changes) | set(costs))]
+        models = models_for(data)
         if models:
             rows = []
             for model in models:
@@ -343,6 +469,8 @@ def render_stats(stats: dict) -> str:
                              f"${model['cost']:,.4f}" if number(model.get("cost")) else "Not available"])
             lines += [table(["AI model", "Lines changed", "Estimated cost (USD)"], rows), ""]
         lines += ["</details>", ""]
+        if key != 'all_time':
+            lines += ['</details>', '']
     lines += ["Source: [WakaTime](https://wakatime.com/@onhate). AI costs are estimates. "
               "Recent totals follow WakaTime's date ranges and can exclude today."]
     return "\n".join(lines)
@@ -360,7 +488,7 @@ def update_readme(path: Path, token: str, output: Path | None = None) -> None:
     section = render_stats(stats)
     graphics = {
         f'wakatime-{kind}{"-mobile" if compact else "-" + theme}.svg': render_graphic(stats, kind, theme, compact)
-        for kind in ('summary', 'activity') for theme, compact in (('light', False), ('dark', False), ('auto', True))
+        for kind in GRAPHIC_KINDS for theme, compact in (('light', False), ('dark', False), ('auto', True))
     }
     newline = "\r\n" if "\r\n" in original else "\n"
     section = ("\n\n" + section + "\n\n").replace("\n", newline)
