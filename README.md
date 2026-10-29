@@ -18,10 +18,17 @@
   <img alt="Recent coding activity: last 7 days, last 30 days, and all-time totals." src="assets/wakatime-activity-light.svg" width="760">
 </picture>
 
-Time totals include Other. Missing measurements are not treated as zero.
+<details>
+<summary>Last 7 days</summary>
+
+<picture>
+  <source media="(max-width: 540px)" srcset="assets/wakatime-week-mobile.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-week-dark.svg">
+  <img alt="Last 7 days: top languages, tools, and AI activity." src="assets/wakatime-week-light.svg" width="760">
+</picture>
 
 <details>
-<summary>Last 7 days: full stats</summary>
+<summary>Extended measurements</summary>
 
 Period: 2026-10-22T03:00:00Z to 2026-10-29T02:59:59Z.
 Time zone: America/Sao\_Paulo.
@@ -103,8 +110,19 @@ Best day: 2026-10-27 — 22 hrs 4 mins.
 
 </details>
 
+</details>
+
 <details>
-<summary>Last 30 days: full stats</summary>
+<summary>Last 30 days</summary>
+
+<picture>
+  <source media="(max-width: 540px)" srcset="assets/wakatime-month-mobile.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-month-dark.svg">
+  <img alt="Last 30 days: top languages, tools, and AI activity." src="assets/wakatime-month-light.svg" width="760">
+</picture>
+
+<details>
+<summary>Extended measurements</summary>
 
 Period: 2026-09-29T03:00:00Z to 2026-10-29T02:59:59Z.
 Time zone: America/Sao\_Paulo.
@@ -200,8 +218,18 @@ Best day: 2026-10-27 — 22 hrs 4 mins.
 
 </details>
 
-<details open>
-<summary>All time: full stats</summary>
+</details>
+
+### All-time coding record
+
+<picture>
+  <source media="(max-width: 540px)" srcset="assets/wakatime-history-mobile.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-history-dark.svg">
+  <img alt="All-time coding history, top languages, tools, and AI activity." src="assets/wakatime-history-light.svg" width="760">
+</picture>
+
+<details>
+<summary>Complete historical measurements</summary>
 
 Period: 2016-06-07T03:00:00Z to 2026-10-29T02:59:59Z.
 Time zone: America/Sao\_Paulo.
