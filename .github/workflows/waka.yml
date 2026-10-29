@@ -1,23 +1,75 @@
 name: Waka Readme
 
 on:
-  # for manual workflow trigger
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Update the public README (false creates a preview only)
+        type: boolean
+        default: false
   schedule:
-    # runs at 12 AM UTC (5:30 AM IST)
     - cron: "0 0 * * *"
+  push:
+    paths:
+      - "scripts/**"
+      - "tests/**"
+      - ".github/workflows/waka.yml"
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "tests/**"
+      - ".github/workflows/waka.yml"
+
+permissions:
+  contents: read
 
 jobs:
-  update-readme:
-    name: WakaReadme DevMetrics
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: athul/waka-readme@master # this action name
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
-          SHOW_TITLE: true
-          SHOW_TOTAL: true
-          LANG_COUNT: 12
-          TIME_RANGE: all_time
-          STOP_AT_OTHER: true
-          IGNORED_LANGUAGES: YAML JSON TOML
+          python-version: "3.13"
+      - run: python -m unittest discover -s tests -v
+
+  update-readme:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: wakatime-readme
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Generate WakaTime preview
+        env:
+          WAKATIME_ACCESS_TOKEN: ${{ secrets.WAKATIME_ACCESS_TOKEN }}
+        run: python scripts/update_wakatime.py --output "$RUNNER_TEMP/wakatime-preview.md"
+      - name: Save preview
+        if: github.event_name == 'workflow_dispatch' && !inputs.publish
+        uses: actions/upload-artifact@v4
+        with:
+          name: wakatime-preview
+          path: ${{ runner.temp }}/wakatime-preview.md
+          retention-days: 7
+      - name: Commit changed stats
+        if: github.event_name == 'schedule' || inputs.publish
+        run: |
+          cp "$RUNNER_TEMP/wakatime-preview.md" README.md
+          if git diff --quiet -- README.md; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update WakaTime stats"
+          git push
