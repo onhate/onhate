@@ -66,6 +66,30 @@ class Response(io.BytesIO):
 
 
 class RenderTests(unittest.TestCase):
+    def test_codex_source_labels_are_displayed_as_codex_without_changing_values(self):
+        stats = sample_stats()
+        stats["last_7_days"]["editors"] = [
+            {"name": "Codex Vscode", "total_seconds": 3600, "percent": 66.67},
+            {"name": "VS Code", "total_seconds": 1800, "percent": 33.33},
+        ]
+        stats["last_7_days"]["ai_model_breakdown"] = [{"name": "Codex-Vscode", "lines": 30, "cost": 0.1234}]
+        output = waka.render_stats(stats, SUMMARIES)
+        self.assertIn("| Codex | 1 hr 0 mins | 66.67% |", output)
+        self.assertIn("| VS Code | 30 mins | 33.33% |", output)
+        self.assertIn("| Codex | 30 | $0.1234 |", output)
+        self.assertNotIn("Codex Vscode", output)
+        self.assertNotIn("Codex-Vscode", output)
+        self.assertEqual(stats["last_7_days"]["editors"][0]["name"], "Codex Vscode")
+
+    def test_codex_label_is_also_corrected_for_model_map_fallback(self):
+        stats = sample_stats()
+        stats["all_time"].pop("ai_model_breakdown")
+        stats["all_time"]["ai_model_line_changes"] = {"Codex-Vscode": 8}
+        stats["all_time"]["ai_model_costs"] = {"Codex-Vscode": 0.25}
+        output = waka.render_stats(stats, SUMMARIES)
+        self.assertIn("| Codex | 8 | $0.2500 |", output)
+        self.assertNotIn("Codex-Vscode", output)
+
     def test_inclusive_totals_and_all_languages_after_other(self):
         output = waka.render_stats(sample_stats(), SUMMARIES)
         self.assertIn("1 hr 30 mins", output)

@@ -41,6 +41,11 @@ section shows the provider's period and time zone. Missing measurements do not
 become zeroes. Missing optional fields and empty breakdowns are omitted.
 AI costs are provider estimates. The script does not infer productivity or review habits.
 
+The README displays WakaTime's `Codex Vscode` and `Codex-Vscode` labels as `Codex`.
+Desktop app sessions can also have `source: vscode`, so these labels do not reliably
+identify VS Code usage. This display change applies to editor and AI model tables.
+It does not change WakaTime records, measured values, or other editor names.
+
 The renderer uses an explicit list of allowed fields. It omits projects, machines,
 and dependencies. Dependency names can contain internal project and package names.
 It also omits

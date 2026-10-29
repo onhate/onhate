@@ -20,6 +20,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 RANGES = {"last_7_days": "Last 7 days", "last_30_days": "Last 30 days", "all_time": "All time"}
 BREAKDOWNS = {"languages": "Languages", "editors": "Editors", "operating_systems": "Operating systems",
               "categories": "Activity categories"}
+# Desktop Codex sessions can also report source=vscode. Do not imply a VS Code install.
+CODEX_DISPLAY_NAMES = {"Codex Vscode": "Codex", "Codex-Vscode": "Codex"}
 AI_METRICS = {
     "ai_additions": "AI lines added", "ai_deletions": "AI lines deleted",
     "human_additions": "Human lines added", "human_deletions": "Human lines deleted",
@@ -128,7 +130,8 @@ def render_stats(stats: dict, summaries: dict) -> str:
                 if not isinstance(entry, dict) or not isinstance(entry.get("name"), str):
                     raise RuntimeError("WakaTime returned an invalid breakdown. README kept.")
                 percent = entry.get("percent")
-                rows.append([text(entry["name"]), duration(entry.get("total_seconds")),
+                name = CODEX_DISPLAY_NAMES.get(entry["name"], entry["name"]) if field == "editors" else entry["name"]
+                rows.append([text(name), duration(entry.get("total_seconds")),
                              f"{percent:.2f}%" if number(percent) else "Not available"])
             lines += [f"#### {title}", "", table(["Name", "Time", "Share"], rows), ""]
         lines += ["#### AI and human activity", ""]
@@ -149,7 +152,7 @@ def render_stats(stats: dict, summaries: dict) -> str:
             for model in models:
                 if not isinstance(model, dict) or not isinstance(model.get("name"), str):
                     raise RuntimeError("WakaTime returned invalid AI model data. README kept.")
-                rows.append([text(model["name"]), count(model["lines"]) if number(model.get("lines")) else "Not available",
+                rows.append([text(CODEX_DISPLAY_NAMES.get(model["name"], model["name"])), count(model["lines"]) if number(model.get("lines")) else "Not available",
                              f"${model['cost']:,.4f}" if number(model.get("cost")) else "Not available"])
             lines += [table(["AI model", "Lines changed", "Estimated cost (USD)"], rows), ""]
         lines += ["</details>", ""]
