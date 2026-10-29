@@ -15,8 +15,9 @@ daily averages, and active-day counts. Active-day blocks show counts, not dates.
 Put lifetime totals below those two periods.
 
 The approved detail design uses top-five language bars, top-two tool summaries,
-three AI metrics, and model chips for each recent period. Keep complete tables
-in a nested Extended measurements drawer. Recent sections start collapsed.
+three AI metrics, and model chips for each recent period. Recent sections start
+collapsed. The user subsequently requested removal of the recent measurement
+drawers and their tables. Keep only the graphics in those sections.
 
 Show the all-time overview outside any collapsible section. Include coding category
 hours and shares, five historical languages, three tools, and AI activity. Keep

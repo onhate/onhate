@@ -49,7 +49,7 @@ the same three Stats responses. No additional API calls are needed.
 
 The 7-day and 30-day sections start collapsed. Each opens to a graphic with
 the top five languages, top two tools, AI additions, sessions, prompts, and model
-names. An Extended measurements drawer contains the complete returned tables.
+names. Recent sections do not include measurement tables.
 
 The all-time overview is always visible. It shows coding category hours and shares,
 the top five historical languages, top three tools, and AI activity. A separate

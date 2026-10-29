@@ -76,11 +76,12 @@ class RenderTests(unittest.TestCase):
         self.assertNotIn('| Period |', output)
         self.assertEqual(output.count('<picture>'), 5)
 
-    def test_recent_details_have_graphics_and_complete_measurements(self):
+    def test_recent_details_have_only_graphics(self):
         output = waka.render_stats(sample_stats())
         self.assertIn('wakatime-week-light.svg', output)
         self.assertIn('wakatime-month-light.svg', output)
-        self.assertEqual(output.count('<summary>Extended measurements</summary>'), 2)
+        self.assertNotIn('Extended measurements', output)
+        self.assertNotIn('#### Languages', output.split('### All-time coding record')[0])
 
     def test_requested_explanatory_text_is_not_rendered(self):
         output = waka.render_stats(sample_stats())
@@ -114,18 +115,18 @@ class RenderTests(unittest.TestCase):
 
     def test_codex_source_labels_are_displayed_as_codex_without_changing_values(self):
         stats = sample_stats()
-        stats["last_7_days"]["editors"] = [
+        stats["all_time"]["editors"] = [
             {"name": "Codex Vscode", "total_seconds": 3600, "percent": 66.67},
             {"name": "VS Code", "total_seconds": 1800, "percent": 33.33},
         ]
-        stats["last_7_days"]["ai_model_breakdown"] = [{"name": "Codex-Vscode", "lines": 30, "cost": 0.1234}]
+        stats["all_time"]["ai_model_breakdown"] = [{"name": "Codex-Vscode", "lines": 30, "cost": 0.1234}]
         output = waka.render_stats(stats)
         self.assertIn("| Codex | 1 hr 0 mins | 66.67% |", output)
         self.assertIn("| VS Code | 30 mins | 33.33% |", output)
         self.assertIn("| Codex | 30 | $0.1234 |", output)
         self.assertNotIn("Codex Vscode", output)
         self.assertNotIn("Codex-Vscode", output)
-        self.assertEqual(stats["last_7_days"]["editors"][0]["name"], "Codex Vscode")
+        self.assertEqual(stats["all_time"]["editors"][0]["name"], "Codex Vscode")
 
     def test_codex_label_is_also_corrected_for_model_map_fallback(self):
         stats = sample_stats()

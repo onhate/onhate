@@ -432,7 +432,8 @@ def render_stats(stats: dict) -> str:
             kind = 'week' if key == 'last_7_days' else 'month'
             lines += ['<details>', f'<summary>{label}</summary>', '',
                       graphic_picture(kind, f'{label}: top languages, tools, and AI activity.'), '',
-                      '<details>', '<summary>Extended measurements</summary>', '']
+                      '</details>', '']
+            continue
         lines += [
                   f"Period: {text(data.get('start', 'Not available'))} to {text(data.get('end', 'Not available'))}.",
                   f"Time zone: {text(data.get('timezone', 'Not available'))}.", ""]
@@ -469,8 +470,6 @@ def render_stats(stats: dict) -> str:
                              f"${model['cost']:,.4f}" if number(model.get("cost")) else "Not available"])
             lines += [table(["AI model", "Lines changed", "Estimated cost (USD)"], rows), ""]
         lines += ["</details>", ""]
-        if key != 'all_time':
-            lines += ['</details>', '']
     lines += ["Source: [WakaTime](https://wakatime.com/@onhate). AI costs are estimates. "
               "Recent totals follow WakaTime's date ranges and can exclude today."]
     return "\n".join(lines)
