@@ -48,8 +48,10 @@ external fonts, or network requests. Python's standard library generates them fr
 the same three Stats responses. No additional API calls are needed.
 
 The 7-day and 30-day sections start collapsed. Each opens to a graphic with
-the top five languages, top two tools, AI additions, sessions, prompts, and model
-names. Recent sections do not include measurement tables.
+the top five languages, top two tools, human and AI line additions and deletions,
+sessions, prompts, AI line changes, tokens, estimated cost, and model names.
+The footer includes the best day, operating-system shares, recent category times,
+period, and time zone when available. Recent sections do not include measurement tables.
 
 The all-time overview is always visible. It shows coding category hours and shares,
 the top five historical languages, top three tools, and AI activity. A separate

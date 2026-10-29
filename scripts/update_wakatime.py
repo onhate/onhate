@@ -143,7 +143,7 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
     def short_count(value):
         if not number(value):
             return 'Not available'
-        return f'{value / 1000000:.2f}M' if value >= 1000000 else f'{value / 1000:.1f}K' if value >= 1000 else count(value)
+        return f'{value / 1000000000:.2f}B' if value >= 1000000000 else f'{value / 1000000:.2f}M' if value >= 1000000 else f'{value / 1000:.1f}K' if value >= 1000 else count(value)
 
     background = box(1, 1, width - 2, height - 2, 'bg', 16, 'border')
     label(32, 34, 'ONHATE · DEVELOPER ACTIVITY' if kind == 'summary' else 'WAKATIME · CODING ACTIVITY', 14, 'muted', 500)
@@ -341,22 +341,41 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
             fitted(tools_x, y + 19, value, tool_span, 12, 'muted')
 
         ai_y = (tools_y + (208 if historical else 157)) if compact else language_y + 221
-        label(32, ai_y, 'AI activity across recorded history' if historical else 'AI activity', 16, weight=500)
-        metrics = [('ai_sessions', 'AI sessions'), ('ai_prompt_events_total', 'Prompts'), ('ai_additions', 'AI lines added')]
-        if not historical:
-            metrics = [metrics[2], metrics[0], metrics[1]]
-        metric_width = (width - 88) / 3
+        label(32, ai_y, 'Human and AI activity', 16, weight=500)
         metric_description = []
+        panel_width = width - 64 if compact else (width - 76) / 2
+        for index, (prefix, name, color) in enumerate((('human', 'Human lines', 'human'), ('ai', 'AI lines', 'ai'))):
+            x = 32 if compact else 32 + index * (panel_width + 12)
+            y = ai_y + 17 + (index * 98 if compact else 0)
+            box(x, y, panel_width, 86, 'soft', 8)
+            label(x + 12, y + 23, name, 13, color, 500)
+            added, deleted = data.get(prefix + '_additions'), data.get(prefix + '_deletions')
+            fitted(x + 12, y + 52, short_count(added) + ' added', panel_width - 24, 21 if number(added) else 13, weight=500)
+            fitted(x + 12, y + 73, short_count(deleted) + ' deleted', panel_width - 24, 13, 'muted')
+            metric_description.append(f'{name}: {short_count(added)} added; {short_count(deleted)} deleted.')
+        cards_y = ai_y + (213 if compact else 115)
+        metrics = [('ai_sessions', 'AI sessions'), ('ai_prompt_events_total', 'Prompts'), ('ai_line_changes_total', 'AI lines changed')]
+        metric_width = (width - 88) / 3
         for index, (field, name) in enumerate(metrics):
             x = 32 + index * (metric_width + 12)
             value = data.get(field)
-            display = short_count(value) if field == 'ai_additions' else count(value) if number(value) else 'Not available'
-            box(x, ai_y + 17, metric_width, 70, 'soft', 8)
-            fitted(x + 12, ai_y + 47, display, metric_width - 24, 22 if number(value) else 13, weight=500)
-            fitted(x + 12, ai_y + 69, name, metric_width - 24, 12, 'muted')
+            display = short_count(value)
+            box(x, cards_y, metric_width, 70, 'soft', 8)
+            fitted(x + 12, cards_y + 30, display, metric_width - 24, 22 if number(value) else 12, weight=500)
+            fitted(x + 12, cards_y + 52, name, metric_width - 24, 10 if compact else 12, 'muted')
             metric_description.append(f'{name}: {display}.')
+        y = cards_y + 101
+        for field, name in (('ai_input_tokens', 'Input tokens'), ('ai_output_tokens', 'Output tokens'),
+                            ('ai_model_total_cost', 'Estimated AI cost (USD)')):
+            value = data.get(field)
+            display = f'${value:,.2f}' if field == 'ai_model_total_cost' and number(value) else short_count(value)
+            label(32, y, name, 13, 'muted')
+            label(width - 32, y, display, 13, anchor='end')
+            metric_description.append(f'{name}: {display}.')
+            y += 24
+        model_y = y + 11
         model_names = [CODEX_DISPLAY_NAMES.get(row['name'], row['name']) for row in models_for(data)]
-        x, y = 32, ai_y + 118
+        x, y = 32, model_y
         for name in model_names[:5] + ([f'+{len(model_names) - 5} more'] if len(model_names) > 5 else []):
             shown = name if len(name) <= 21 else name[:20] + '…'
             chip_width = min(len(shown) * 9 + 24, width - 64)
@@ -365,7 +384,32 @@ def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) ->
             box(x, y - 19, chip_width, 27, 'soft', 5)
             fitted(x + 10, y, shown, chip_width - 20, 13, 'muted')
             x += chip_width + 8
-        height = int(y + 31)
+        y += 37
+        best = data.get('best_day')
+        if isinstance(best, dict) and isinstance(best.get('date'), str) and number(best.get('total_seconds')):
+            fitted(32, y, f'Best day · {best["date"][:10]} · {duration(best["total_seconds"])}', width - 64, 12, 'muted')
+            y += 23
+        systems = ranked('operating_systems', 3)
+        if systems:
+            summary = ' · '.join(row['name'] + (f' {row["percent"]:.1f}%' if number(row.get('percent')) else '') for row in systems)
+            fitted(32, y, summary, width - 64, 12, 'muted')
+            y += 23
+        if not historical:
+            categories = ranked('categories', 2)
+            for row in categories:
+                value = row['name'] + ' · ' + duration(row.get('total_seconds'))
+                if number(row.get('percent')):
+                    value += f' · {row["percent"]:.1f}%'
+                fitted(32, y, value, width - 64, 12, 'muted')
+                y += 23
+        start, end = data.get('start'), data.get('end')
+        if isinstance(start, str) and isinstance(end, str):
+            fitted(32, y, f'{start[:10]} to {end[:10]}', width - 64, 12, 'muted')
+            y += 23
+        if isinstance(data.get('timezone'), str):
+            fitted(32, y, data['timezone'], width - 64, 12, 'muted')
+            y += 23
+        height = int(y + 18)
         root.set('height', str(height))
         root.set('viewBox', f'0 0 {width} {height}')
         background.set('height', str(height - 2))

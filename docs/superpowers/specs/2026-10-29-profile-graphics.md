@@ -17,7 +17,10 @@ Put lifetime totals below those two periods.
 The approved detail design uses top-five language bars, top-two tool summaries,
 three AI metrics, and model chips for each recent period. Recent sections start
 collapsed. The user subsequently requested removal of the recent measurement
-drawers and their tables. Keep only the graphics in those sections.
+drawers and their tables. Keep only the graphics in those sections. Summarize
+the useful measurements in the images: equal human and AI line panels, sessions,
+prompts, AI line changes, tokens, estimated cost, best day, operating-system shares,
+and the provider period and time zone. Include recent category times in the footer.
 
 Show the all-time overview outside any collapsible section. Include coding category
 hours and shares, five historical languages, three tools, and AI activity. Keep

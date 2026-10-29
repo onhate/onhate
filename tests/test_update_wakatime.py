@@ -410,7 +410,8 @@ class GraphicTests(unittest.TestCase):
         self.assertNotIn('Monthly language', weekly)
         self.assertIn('Monthly language', monthly)
         self.assertNotIn('Weekly 0', monthly)
-        self.assertIn('AI lines added', weekly)
+        self.assertIn('AI lines', weekly)
+        self.assertIn('added', weekly)
         self.assertIn('AI sessions', weekly)
         self.assertIn('Prompts', weekly)
 
@@ -424,6 +425,16 @@ class GraphicTests(unittest.TestCase):
         self.assertIn('10,749 hrs 31 mins', summary)
         self.assertIn('1,982 hrs 58 mins', summary)
         self.assertIn('Historical 6', waka.render_stats(self.stats))
+
+    def test_detail_images_summarize_measurements_without_private_fields(self):
+        for kind in ('week', 'month', 'history'):
+            with self.subTest(kind=kind):
+                output = self.svg_text(kind)
+                for expected in ('Human lines', 'AI lines', 'added', 'deleted', 'AI sessions',
+                                 'Prompts', 'AI lines changed', 'Input tokens', 'Output tokens',
+                                 'Estimated AI cost', 'Best day', '2026-10-28', 'Mac', '100.0%'):
+                    self.assertIn(expected, output)
+                self.assertNotIn('SECRET', output)
 
     def test_mobile_svg_handles_its_own_theme_without_scripts(self):
         output = waka.render_graphic(self.stats, 'summary', 'auto', True)
