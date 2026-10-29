@@ -423,44 +423,6 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 </details>
 
-<details>
-<summary>Daily activity: last 30 calendar days (includes today)</summary>
-
-| Date | Time |
-| --- | --- |
-| 2026-09-30 | 10 hrs 8 mins |
-| 2026-10-01 | 11 hrs 41 mins |
-| 2026-10-02 | 14 hrs 14 mins |
-| 2026-10-03 | 1 hr 34 mins |
-| 2026-10-04 | 6 hrs 51 mins |
-| 2026-10-05 | 12 hrs 48 mins |
-| 2026-10-06 | 14 hrs 32 mins |
-| 2026-10-07 | 16 hrs 40 mins |
-| 2026-10-08 | 16 hrs 51 mins |
-| 2026-10-09 | 0 mins |
-| 2026-10-10 | 0 mins |
-| 2026-10-11 | 0 mins |
-| 2026-10-12 | 6 hrs 30 mins |
-| 2026-10-13 | 11 hrs 22 mins |
-| 2026-10-14 | 8 hrs 29 mins |
-| 2026-10-15 | 4 hrs 7 mins |
-| 2026-10-16 | 3 hrs 19 mins |
-| 2026-10-17 | 0 mins |
-| 2026-10-18 | Less than 1 min |
-| 2026-10-19 | 12 hrs 59 mins |
-| 2026-10-20 | 7 hrs 38 mins |
-| 2026-10-21 | 8 hrs 11 mins |
-| 2026-10-22 | 13 hrs 56 mins |
-| 2026-10-23 | 12 hrs 38 mins |
-| 2026-10-24 | 10 hrs 53 mins |
-| 2026-10-25 | 11 hrs 10 mins |
-| 2026-10-26 | 19 hrs 56 mins |
-| 2026-10-27 | 22 hrs 4 mins |
-| 2026-10-28 | 15 hrs 52 mins |
-| 2026-10-29 | 1 hr 39 mins |
-
-</details>
-
 Source: [WakaTime](https://wakatime.com/@onhate). AI costs are estimates. Recent totals follow WakaTime's date ranges and can exclude today.
 
 <!--END_SECTION:waka-->
