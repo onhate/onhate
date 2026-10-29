@@ -23,17 +23,30 @@ plugins; they still need it to send activity.
 ## Preview and publish
 
 Open **Actions → Waka Readme → Run workflow**. Leave **publish** disabled to make
-a preview. Download the `wakatime-preview` artifact to read the generated Markdown.
+a preview. Download the `wakatime-preview` artifact to read the generated Markdown
+and its `assets` folder.
 This run does not change README.md. Preview artifacts expire after seven days.
 
 Enable **publish** to update the README. Scheduled runs also publish. Pushes and
-pull requests run tests only. The workflow commits only README.md when it changes.
+pull requests run tests only. The workflow commits README.md and the generated
+`assets/wakatime-*.svg` images when either changes.
 
 ## Data
 
-The overview compares 7 days, 30 days, and all time. Each period has an expandable
+The unified banner gives human coding and AI coding equal space. Its category
+hours and added-line counts use all-time data. Its top three languages and remaining
+language share use last-30-day percentages. Both periods are labeled explicitly.
+
+The Recent coding activity graphic compares 7-day and 30-day totals, daily averages,
+and active-day counts, with lifetime totals below. The blocks show counts, not dates.
+Each graphic has a light, dark, and narrow-screen layout. The SVGs contain no scripts,
+external fonts, or network requests. Python's standard library generates them from
+the same three Stats responses. No additional API calls are needed.
+
+Each period has an expandable
 section with the returned languages, editors, operating systems, categories,
 and AI measurements. No language filters or row limits are applied.
+The all-time section is open by default. The recent sections start collapsed.
 
 Time totals include Other. Recent Stats ranges can exclude today. Each expanded
 section shows the provider's period and time zone. Missing measurements do not
@@ -67,4 +80,7 @@ also make a preview on your computer:
 python3 scripts/update_wakatime.py --output /tmp/wakatime-preview.md
 ```
 
-This leaves README.md unchanged. Never commit credentials or raw account exports.
+This leaves README.md and its assets unchanged. The preview images are written to
+an `assets` folder beside the output Markdown. Use a preview directory outside the
+README directory so the two sets of assets stay separate. Never commit credentials
+or raw account exports.

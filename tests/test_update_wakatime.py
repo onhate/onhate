@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 
@@ -59,6 +60,18 @@ class Response(io.BytesIO):
 
 
 class RenderTests(unittest.TestCase):
+    def test_all_time_details_are_open_by_default(self):
+        output = waka.render_stats(sample_stats())
+        self.assertIn('<details open>\n<summary>All time: full stats</summary>', output)
+        self.assertIn('<details>\n<summary>Last 7 days: full stats</summary>', output)
+
+    def test_overview_uses_graphics_instead_of_a_table(self):
+        output = waka.render_stats(sample_stats())
+        self.assertIn('wakatime-summary-light.svg', output)
+        self.assertIn('wakatime-activity-dark-mobile.svg', output)
+        self.assertNotIn('| Period |', output)
+        self.assertEqual(output.count('<picture>'), 2)
+
     def test_daily_activity_is_not_rendered(self):
         output = waka.render_stats(sample_stats())
         self.assertNotIn("Daily activity", output)
@@ -130,7 +143,7 @@ class RenderTests(unittest.TestCase):
         stats = sample_stats()
         stats["all_time"]["languages"][0]["name"] = "<img src=x>|[click](bad)\n# Heading"
         output = waka.render_stats(stats)
-        self.assertNotIn("<img", output)
+        self.assertNotIn("<img src=x", output)
         self.assertNotIn("[click](bad)", output)
         self.assertNotIn("\n# Heading", output)
         self.assertIn("&lt;img", output)
@@ -235,12 +248,131 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(self.path.read_bytes(), self.original.encode())
 
     def test_preview_writes_output_without_changing_readme(self):
-        output = self.path.parent / "preview.md"
+        preview_dir = self.path.parent / "preview"
+        preview_dir.mkdir()
+        output = preview_dir / "preview.md"
         payloads = [{"data": value} for value in sample_stats().values()]
         with patch.object(waka, "fetch_data", side_effect=payloads):
             waka.update_readme(self.path, "secret", output)
         self.assertEqual(self.path.read_bytes(), self.original.encode())
-        self.assertIn("Coding activity", output.read_text())
+        self.assertIn("wakatime-summary-light.svg", output.read_text())
+        images = list((preview_dir / 'assets').glob('wakatime-*.svg'))
+        self.assertEqual(len(images), 8)
+        for image in images:
+            self.assertTrue(ET.fromstring(image.read_text()).tag.endswith('svg'))
+        self.assertFalse((self.path.parent / 'assets').exists())
+
+    def test_assets_are_updated_even_when_markdown_is_unchanged(self):
+        def payloads():
+            return [{"data": value} for value in sample_stats().values()]
+        with patch.object(waka, "fetch_data", side_effect=payloads()):
+            waka.update_readme(self.path, "secret")
+        original_readme = self.path.read_bytes()
+        graphic = self.path.parent / 'assets/wakatime-summary-light.svg'
+        original_graphic = graphic.read_bytes()
+        graphic.write_text('stale image')
+        with patch.object(waka, "fetch_data", side_effect=payloads()):
+            waka.update_readme(self.path, "secret")
+        self.assertEqual(self.path.read_bytes(), original_readme)
+        self.assertEqual(graphic.read_bytes(), original_graphic)
+
+    def test_preview_beside_readme_is_rejected_without_changing_public_assets(self):
+        asset_dir = self.path.parent / 'assets'
+        asset_dir.mkdir()
+        image = asset_dir / 'wakatime-summary-light.svg'
+        image.write_text('published image')
+        with patch.object(waka, 'fetch_data', side_effect=[{'data': value} for value in sample_stats().values()]):
+            with self.assertRaises(RuntimeError):
+                waka.update_readme(self.path, 'secret', self.path.parent / 'preview.md')
+        self.assertEqual(image.read_text(), 'published image')
+        self.assertEqual(self.path.read_bytes(), self.original.encode())
+
+
+class GraphicTests(unittest.TestCase):
+    def setUp(self):
+        self.stats = sample_stats()
+        self.stats['all_time']['categories'] = [
+            {'name': 'Coding', 'total_seconds': 10749 * 3600 + 31 * 60},
+            {'name': 'AI Coding', 'total_seconds': 1982 * 3600 + 58 * 60},
+        ]
+        self.stats['all_time']['human_additions'] = 11539423
+        self.stats['all_time']['ai_additions'] = 1264025
+        self.stats['last_30_days']['languages'] = [
+            {'name': 'TypeScript', 'total_seconds': 900, 'percent': 25},
+            {'name': 'Python', 'total_seconds': 1800, 'percent': 50},
+            {'name': 'Markdown', 'total_seconds': 540, 'percent': 15},
+            {'name': 'Other', 'total_seconds': 360, 'percent': 10},
+        ]
+
+    def svg_text(self, kind='summary', theme='light', compact=False):
+        root = ET.fromstring(waka.render_graphic(self.stats, kind, theme, compact))
+        return ' '.join(root.itertext())
+
+    def test_summary_uses_all_time_totals_and_recent_languages(self):
+        output = self.svg_text()
+        for value in ('10,749', '1,982', '11.54M', '1.26M', 'LAST 30 DAYS', 'Python', '50.0%', '25.0%', '15.0%', 'Remaining languages', '10.0%'):
+            self.assertIn(value, output)
+        self.assertNotIn('YAML', output)
+        self.assertNotIn('SECRET', output)
+
+    def test_missing_measurements_do_not_become_zero(self):
+        self.stats['all_time'].pop('ai_additions')
+        self.stats['all_time']['categories'] = []
+        output = self.svg_text()
+        self.assertIn('Not available', output)
+        self.assertNotIn('0 hrs', output)
+
+    def test_null_optional_breakdowns_are_unavailable(self):
+        self.stats['all_time']['categories'] = None
+        self.stats['last_30_days']['languages'] = None
+        output = self.svg_text()
+        self.assertIn('Not available', output)
+        self.assertIn('No language percentages available', output)
+
+    def test_language_control_characters_do_not_make_invalid_xml(self):
+        self.stats['last_30_days']['languages'][1]['name'] = 'Python\x00 name'
+        output = self.svg_text()
+        self.assertIn('Python', output)
+        self.assertNotIn('\x00', output)
+
+    def test_measured_zero_is_displayed(self):
+        self.stats['all_time']['ai_additions'] = 0
+        self.stats['all_time']['categories'][1]['total_seconds'] = 0
+        output = self.svg_text()
+        self.assertIn('0 lines added by AI', output)
+        self.assertIn('0 hrs', output)
+
+    def test_untrusted_language_names_are_xml_text(self):
+        self.stats['last_30_days']['languages'][1]['name'] = '<script>alert("x")</script> & more'
+        output = waka.render_graphic(self.stats, 'summary', 'dark')
+        root = ET.fromstring(output)
+        self.assertFalse(any(element.tag.endswith('script') for element in root.iter()))
+        self.assertIn('&lt;script&gt;', output)
+
+    def test_all_theme_and_layout_variants_are_accessible_svg(self):
+        for kind in ('summary', 'activity'):
+            for theme in ('light', 'dark'):
+                for compact in (False, True):
+                    with self.subTest(kind=kind, theme=theme, compact=compact):
+                        output = waka.render_graphic(self.stats, kind, theme, compact)
+                        root = ET.fromstring(output)
+                        self.assertEqual(root.attrib['role'], 'img')
+                        self.assertTrue(root.find('{http://www.w3.org/2000/svg}title').text)
+                        self.assertTrue(root.find('{http://www.w3.org/2000/svg}desc').text)
+                        self.assertNotIn('foreignObject', output)
+                        self.assertNotIn('SECRET', output)
+
+    def test_recent_activity_uses_provider_days_and_inclusive_time(self):
+        self.stats['last_7_days']['days_minus_holidays'] = 5
+        self.stats['last_30_days']['days_minus_holidays'] = 26
+        self.stats['last_30_days']['days_including_holidays'] = 30
+        output = self.svg_text('activity')
+        self.assertIn('1 hr 30 mins', output)
+        self.assertIn('5 / 7', output)
+        self.assertIn('26 / 30', output)
+        self.assertIn('Blocks show counts, not dates', output)
+        self.assertNotIn('Your', output)
+        self.assertNotIn(' I ', output)
 
 
 if __name__ == "__main__":

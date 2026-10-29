@@ -11,6 +11,7 @@ import re
 import sys
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -70,6 +71,194 @@ def table(headers, rows):
     ])
 
 
+def render_graphic(stats: dict, kind: str, theme: str, compact: bool = False) -> str:
+    """Render the approved profile layouts as standalone, script-free SVGs."""
+    if kind not in ('summary', 'activity') or theme not in ('light', 'dark'):
+        raise ValueError('Invalid graphic kind or theme')
+    dark = theme == 'dark'
+    palette = {
+        'bg': '#0d1117' if dark else '#ffffff',
+        'ink': '#e6edf3' if dark else '#1f2328',
+        'muted': '#9198a1' if dark else '#59636e',
+        'border': '#30363d' if dark else '#d1d9e0',
+        'soft': '#161b22' if dark else '#f6f8fa',
+        'human': '#58a6ff' if dark else '#0969da',
+        'ai': '#bc8cff' if dark else '#8250df',
+        'human_soft': '#101c2d' if dark else '#f1f7ff',
+        'ai_soft': '#1c152b' if dark else '#f8f3ff',
+        'track': '#303943' if dark else '#e3e7eb',
+    }
+    width = 400 if compact else 760
+    height = 660 if compact else 440
+    title = 'Human experience. AI in practice.' if kind == 'summary' else 'Recent coding activity'
+    root = ET.Element('svg', {
+        'xmlns': 'http://www.w3.org/2000/svg', 'width': str(width), 'height': str(height),
+        'viewBox': f'0 0 {width} {height}', 'role': 'img',
+        'aria-labelledby': 'graphic-title graphic-description',
+        'font-family': '-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+    })
+    ET.SubElement(root, 'title', id='graphic-title').text = title
+    description = ET.SubElement(root, 'desc', id='graphic-description')
+
+    def label(x, y, value, size=16, color='ink', weight=400, anchor=None):
+        attrs = {'x': str(x), 'y': str(y), 'font-size': str(size),
+                 'fill': palette.get(color, color), 'font-weight': str(weight)}
+        if anchor:
+            attrs['text-anchor'] = anchor
+        node = ET.SubElement(root, 'text', attrs)
+        node.text = ''.join(char for char in ' '.join(str(value).split()) if ord(char) >= 32)
+        return node
+
+    def box(x, y, w, h, fill, radius=0, stroke=None):
+        attrs = {'x': str(x), 'y': str(y), 'width': str(w), 'height': str(h),
+                 'fill': palette.get(fill, fill), 'rx': str(radius)}
+        if stroke:
+            attrs['stroke'] = palette[stroke]
+        return ET.SubElement(root, 'rect', attrs)
+
+    def rule(x1, y1, x2, y2):
+        ET.SubElement(root, 'line', {'x1': str(x1), 'y1': str(y1), 'x2': str(x2),
+                                   'y2': str(y2), 'stroke': palette['border']})
+
+    def short_count(value):
+        if not number(value):
+            return 'Not available'
+        return f'{value / 1000000:.2f}M' if value >= 1000000 else f'{value / 1000:.1f}K' if value >= 1000 else count(value)
+
+    box(1, 1, width - 2, height - 2, 'bg', 16, 'border')
+    label(32, 34, 'ONHATE · DEVELOPER ACTIVITY' if kind == 'summary' else 'WAKATIME · CODING ACTIVITY', 14, 'muted', 500)
+
+    if kind == 'summary':
+        defs = ET.SubElement(root, 'defs')
+        gradient = ET.SubElement(defs, 'linearGradient', id='banner-background')
+        for offset, color in (('0%', 'human_soft'), ('48%', 'bg'), ('100%', 'ai_soft')):
+            ET.SubElement(gradient, 'stop', {'offset': offset, 'stop-color': palette[color]})
+        # Insert the fill behind the content and retain the outer border.
+        root.insert(3, ET.Element('rect', {'x': '2', 'y': '2', 'width': str(width - 4),
+                                         'height': str(height - 4), 'rx': '15', 'fill': 'url(#banner-background)'}))
+        label(32, 78, 'Human experience.', 32, weight=600)
+        label(32, 113, 'AI in practice.', 32, weight=600)
+        label(32, 140, 'All-time tracked coding activity', 16, 'muted')
+        all_time = stats['all_time']
+        category_rows = all_time.get('categories')
+        categories = {row['name']: row.get('total_seconds') for row in (category_rows if isinstance(category_rows, list) else [])
+                      if isinstance(row, dict) and isinstance(row.get('name'), str)}
+        metric_description = []
+        for index, (category, heading, line_key, suffix, color) in enumerate((
+            ('Coding', 'Human coding', 'human_additions', 'lines added by hand', 'human'),
+            ('AI Coding', 'AI coding', 'ai_additions', 'lines added by AI', 'ai'),
+        )):
+            x = 32 if compact or index == 0 else 408
+            y = (199 + index * 144) if compact else 186
+            label(x, y, heading, 18, color, 500)
+            seconds = categories.get(category)
+            hours = f'{int(seconds // 3600):,}' if number(seconds) else 'Not available'
+            node = label(x, y + 48, hours, 44 if number(seconds) else 26, weight=600)
+            if number(seconds):
+                ET.SubElement(node, 'tspan', {'dx': '8', 'font-size': '18', 'font-weight': '400',
+                                              'fill': palette['muted']}).text = 'hrs'
+            lines = short_count(all_time.get(line_key))
+            label(x, y + 76, f'{lines} {suffix}' if lines != 'Not available' else f'{suffix}: Not available', 16, 'muted')
+            metric_description.append(f'{heading}: {hours} hrs; {lines} {suffix}.')
+        if compact:
+            rule(32, 305, 368, 305)
+        else:
+            rule(380, 169, 380, 271)
+        language_y = 455 if compact else 306
+        label(32, language_y, 'TOP LANGUAGES', 14, 'muted', 500)
+        label(width - 32, language_y, 'LAST 30 DAYS', 14, 'muted', 500, 'end')
+        language_rows = stats['last_30_days'].get('languages')
+        candidates = [row for row in (language_rows if isinstance(language_rows, list) else [])
+                      if isinstance(row, dict) and isinstance(row.get('name'), str)
+                      and number(row.get('percent')) and 0 < row['percent'] <= 100]
+        languages = sorted(candidates, key=lambda row: row['percent'], reverse=True)[:3]
+        if sum(row['percent'] for row in languages) > 100.1:
+            raise RuntimeError('WakaTime returned invalid language percentages. README kept.')
+        if languages:
+            colors = ('#58a6ff' if dark else '#3178c6', '#f4a454' if dark else '#b35c00', '#e3c84a' if dark else '#9a7b00')
+            segments = [(row['name'], row['percent'], colors[i]) for i, row in enumerate(languages)]
+            segments.append(('Remaining languages', max(0, 100 - sum(row['percent'] for row in languages)), palette['track']))
+            bar_width = width - 64
+            cursor = 32.0
+            for name, percent, color in segments:
+                segment_width = bar_width * percent / 100
+                if segment_width:
+                    node = box(cursor, language_y + 18, segment_width, 10, color)
+                    ET.SubElement(node, 'title').text = f'{name}: {percent:.1f}% of the last 30 days'
+                cursor += segment_width
+            for index, (name, percent, color) in enumerate(segments):
+                column = 0 if compact else index % 2
+                row = index if compact else index // 2
+                x = 32 + column * 352
+                y = language_y + 57 + row * 25
+                box(x, y - 10, 8, 8, color, 4)
+                shown_name = name if len(name) <= 20 else name[:19] + '…'
+                name_node = label(x + 16, y, shown_name, 15)
+                clip_id = f'language-name-{index}'
+                clip = ET.SubElement(defs, 'clipPath', id=clip_id)
+                ET.SubElement(clip, 'rect', {'x': str(x + 16), 'y': str(y - 17),
+                                           'width': str((width - 64 if compact else 320) - 80), 'height': '23'})
+                name_node.set('clip-path', f'url(#{clip_id})')
+                ET.SubElement(name_node, 'title').text = name
+                label(width - 32 if compact else x + 320, y, f'{percent:.1f}%', 15, 'muted', anchor='end')
+            description.text = ' '.join(metric_description) + ' Last 30 days: ' + '; '.join(f'{name} {percent:.1f}%' for name, percent, _ in segments)
+        else:
+            label(32, language_y + 43, 'No language percentages available', 16, 'muted')
+            description.text = ' '.join(metric_description) + ' Last-30-day language percentages unavailable.'
+        label(32, height - 22, 'WakaTime · Languages: last 30 days' if compact else 'WakaTime · All-time totals · Languages: last 30 days', 14, 'muted')
+    else:
+        label(32, 80, 'Recent coding activity.', 30, weight=600)
+        label(32, 109, 'Recent activity, with a longer view below', 16, 'muted')
+        descriptions = []
+        for index, key in enumerate(('last_7_days', 'last_30_days')):
+            data = stats[key]
+            x = 32 if compact or index == 0 else 408
+            y = 155 + (index * 185 if compact else 0)
+            span = width - 64 if compact else 320
+            label(x, y, RANGES[key], 18, weight=500)
+            total = duration(inclusive(data, 'total_seconds'))
+            average = duration(inclusive(data, 'daily_average'))
+            label(x, y + 46, total, 30, weight=600)
+            label(x, y + 75, f'{average} daily average', 16, 'muted')
+            active, days = data.get('days_minus_holidays'), data.get('days_including_holidays')
+            valid_days = number(days) and int(days) == days and 0 < days <= 31
+            valid_active = number(active) and int(active) == active
+            count_label = f'{count(active)} / {count(days)}' if valid_days and valid_active and active <= days else f'{count(active)} active' if valid_active else 'Not available'
+            label(x, y + 113, 'Active days', 14, 'muted')
+            label(x + span, y + 113, count_label, 14, anchor='end')
+            if valid_days and valid_active and active <= days:
+                block_width = (span - 3 * (int(days) - 1)) / days
+                for day in range(int(days)):
+                    box(x + day * (block_width + 3), y + 127, block_width, 12, 'human' if day < active else 'track', 2)
+            descriptions.append(f'{RANGES[key]}: {total}; {average} daily average; {count_label} days.')
+        y = 524 if compact else 326
+        box(32, y, width - 64, 87, 'soft', 10)
+        label(48, y + 25, 'ALL TIME', 14, 'muted', 500)
+        total = duration(inclusive(stats['all_time'], 'total_seconds'))
+        label(48 if compact else width - 48, y + (52 if compact else 28), total, 22, weight=500, anchor=None if compact else 'end')
+        lifetime_active = stats['all_time'].get('days_minus_holidays')
+        active_text = f' · {count(lifetime_active)} active days' if number(lifetime_active) else ''
+        label(48, y + (74 if compact else 62), duration(inclusive(stats['all_time'], 'daily_average')) + (' daily avg' if compact else ' daily average') + active_text, 14, 'muted')
+        label(32, height - 21, 'Time includes Other · Blocks show counts, not dates', 14, 'muted')
+        description.text = ' '.join(descriptions) + f' All time: {total}. Blocks show counts, not dates.'
+    for node in root.iter():
+        if node.text:
+            node.text = ''.join(char for char in node.text if ord(char) >= 32)
+    return ET.tostring(root, encoding='unicode') + '\n'
+
+
+def graphic_picture(kind: str, alt: str) -> str:
+    prefix = f'assets/wakatime-{kind}'
+    return '\n'.join([
+        '<picture>',
+        f'  <source media="(max-width: 540px) and (prefers-color-scheme: dark)" srcset="{prefix}-dark-mobile.svg">',
+        f'  <source media="(max-width: 540px)" srcset="{prefix}-light-mobile.svg">',
+        f'  <source media="(prefers-color-scheme: dark)" srcset="{prefix}-dark.svg">',
+        f'  <img alt="{html.escape(alt, quote=True)}" src="{prefix}-light.svg" width="760">',
+        '</picture>',
+    ])
+
+
 def fetch_data(path: str, token: str) -> dict:
     request = Request("https://api.wakatime.com/api/v1/users/current/" + path,
                       headers={"Authorization": f"Bearer {token}", "Accept": "application/json",
@@ -100,18 +289,16 @@ def fetch_data(path: str, token: str) -> dict:
 
 
 def render_stats(stats: dict) -> str:
-    lines = ["### Coding activity", "", "Time totals include Other. Missing measurements are not treated as zero.", ""]
-    overview = []
-    for key, label in RANGES.items():
+    lines = [graphic_picture('summary', 'Human and AI coding totals. Top language percentages from the last 30 days.'), '',
+             graphic_picture('activity', 'Recent coding activity: last 7 days, last 30 days, and all-time totals.'), '',
+             'Time totals include Other. Missing measurements are not treated as zero.', '']
+    for key in RANGES:
         data = stats[key]
         if not isinstance(data, dict) or not number(inclusive(data, "total_seconds")):
             raise RuntimeError("WakaTime returned invalid totals. README kept.")
-        overview.append([label, duration(inclusive(data, "total_seconds")), duration(inclusive(data, "daily_average")),
-                         count(data["days_minus_holidays"]) if number(data.get("days_minus_holidays")) else "Not available"])
-    lines += [table(["Period", "Total time", "Daily average", "Active days"], overview), ""]
     for key, label in RANGES.items():
         data = stats[key]
-        lines += ["<details>", f"<summary>{label}: full stats</summary>", "",
+        lines += ["<details open>" if key == 'all_time' else "<details>", f"<summary>{label}: full stats</summary>", "",
                   f"Period: {text(data.get('start', 'Not available'))} to {text(data.get('end', 'Not available'))}.",
                   f"Time zone: {text(data.get('timezone', 'Not available'))}.", ""]
         best = data.get("best_day") or {}
@@ -160,15 +347,25 @@ def render_stats(stats: dict) -> str:
 def update_readme(path: Path, token: str, output: Path | None = None) -> None:
     if not token.strip():
         raise RuntimeError("Set the WAKATIME_ACCESS_TOKEN repository secret. README kept.")
+    if output is not None and output.parent.resolve() == path.parent.resolve():
+        raise RuntimeError('Use a separate directory for preview output to keep public images unchanged.')
     original = path.read_bytes().decode("utf-8")
     if original.count(START) != 1 or original.count(END) != 1 or original.index(START) >= original.index(END):
         raise RuntimeError("README must have one ordered pair of WakaTime section markers.")
     stats = {key: fetch_data(f"stats/{key}", token)["data"] for key in RANGES}
     section = render_stats(stats)
+    graphics = {
+        f'wakatime-{kind}-{theme}{"-mobile" if compact else ""}.svg': render_graphic(stats, kind, theme, compact)
+        for kind in ('summary', 'activity') for theme in ('light', 'dark') for compact in (False, True)
+    }
     newline = "\r\n" if "\r\n" in original else "\n"
     section = ("\n\n" + section + "\n\n").replace("\n", newline)
     updated = original[:original.index(START) + len(START)] + section + original[original.index(END):]
     target = output or path
+    asset_dir = target.parent / 'assets'
+    asset_dir.mkdir(exist_ok=True)
+    for filename, content in graphics.items():
+        (asset_dir / filename).write_text(content, encoding='utf-8')
     if target == path and updated == original:
         return
     temporary = None
