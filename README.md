@@ -54,7 +54,7 @@ Best day: 2026-10-27 — 22 hrs 4 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Codex Vscode | 82 hrs 36 mins | 81.00% |
+| Codex | 82 hrs 36 mins | 81.00% |
 | Claude Code | 19 hrs 22 mins | 19.00% |
 
 #### Operating systems
@@ -150,7 +150,7 @@ Best day: 2026-10-27 — 22 hrs 4 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Codex Vscode | 178 hrs 57 mins | 64.72% |
+| Codex | 178 hrs 57 mins | 64.72% |
 | Claude Code | 97 hrs 32 mins | 35.28% |
 
 #### Operating systems
@@ -190,7 +190,7 @@ Best day: 2026-10-27 — 22 hrs 4 mins.
 | --- | --- | --- |
 | Opus | 119,271 | $2,968.8755 |
 | GPT | 95,549 | $1,632.4987 |
-| Codex-Vscode | 6 | $6,629.2045 |
+| Codex | 6 | $6,629.2045 |
 | Sonnet | 0 | $498.3892 |
 | Haiku | 0 | $1.0403 |
 
@@ -355,7 +355,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | WebStorm | 8,318 hrs 45 mins | 65.11% |
 | IntelliJ IDEA | 2,061 hrs 44 mins | 16.14% |
 | Claude Code | 1,308 hrs 41 mins | 10.24% |
-| Codex Vscode | 278 hrs 46 mins | 2.18% |
+| Codex | 278 hrs 46 mins | 2.18% |
 | VS Code | 264 hrs 30 mins | 2.07% |
 | PyCharm | 177 hrs 27 mins | 1.39% |
 | Unknown Editor | 120 hrs 21 mins | 0.94% |
@@ -415,7 +415,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | Claude | 522,078 | $19,124.8519 |
 | Opus | 285,113 | $17,400.6756 |
 | Cursor | 3,480 | $0.0000 |
-| Codex-Vscode | 1,875 | $6,086.5425 |
+| Codex | 1,875 | $6,086.5425 |
 | Fable | 445 | $46.1292 |
 | Sonnet | 185 | $856.5364 |
 | Vscode-Wakatime | 21 | $739.8199 |
