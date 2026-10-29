@@ -4,46 +4,12 @@
 
 <!--START_SECTION:waka-->
 
-<picture>
-  <source media="(max-width: 540px)" srcset="assets/wakatime-summary-mobile.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-summary-dark.svg">
-  <img alt="Human and AI coding totals. Top language percentages from the last 30 days." src="assets/wakatime-summary-light.svg" width="760">
-</picture>
+## Coding activity
 
 <picture>
-  <source media="(max-width: 540px)" srcset="assets/wakatime-activity-mobile.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-activity-dark.svg">
-  <img alt="Recent coding activity: last 7 days, last 30 days, and all-time totals." src="assets/wakatime-activity-light.svg" width="760">
-</picture>
-
-<details>
-<summary>Last 7 days</summary>
-
-<picture>
-  <source media="(max-width: 540px)" srcset="assets/wakatime-week-mobile.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-week-dark.svg">
-  <img alt="Last 7 days: top languages, tools, and AI activity." src="assets/wakatime-week-light.svg" width="760">
-</picture>
-
-</details>
-
-<details>
-<summary>Last 30 days</summary>
-
-<picture>
-  <source media="(max-width: 540px)" srcset="assets/wakatime-month-mobile.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-month-dark.svg">
-  <img alt="Last 30 days: top languages, tools, and AI activity." src="assets/wakatime-month-light.svg" width="760">
-</picture>
-
-</details>
-
-### All-time coding record
-
-<picture>
-  <source media="(max-width: 540px)" srcset="assets/wakatime-history-mobile.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-history-dark.svg">
-  <img alt="All-time coding history, top languages, tools, and AI activity." src="assets/wakatime-history-light.svg" width="760">
+  <source media="(max-width: 540px)" srcset="assets/wakatime-profile-mobile.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/wakatime-profile-dark.svg">
+  <img alt="Human and AI coding history, last 7 and 30 days, and all-time summary." src="assets/wakatime-profile-light.svg" width="760">
 </picture>
 
 <details>
