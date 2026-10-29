@@ -71,7 +71,7 @@ class RenderTests(unittest.TestCase):
         self.assertIn("1 hr 30 mins", output)
         self.assertIn("YAML", output)
         self.assertIn("Other", output)
-        for name in ("VS Code", "Mac", "Coding", "react", "2026-10-28", "2026-10-29"):
+        for name in ("VS Code", "Mac", "Coding", "2026-10-28", "2026-10-29"):
             self.assertIn(name, output)
         self.assertIn("16.67%", output)
 
@@ -79,6 +79,13 @@ class RenderTests(unittest.TestCase):
         output = waka.render_stats(sample_stats(), SUMMARIES)
         self.assertNotIn("SECRET", output)
         self.assertNotIn("192.0.2.1", output)
+
+    def test_dependencies_are_omitted_because_they_can_contain_internal_project_names(self):
+        stats = sample_stats()
+        stats["last_7_days"]["dependencies"] = [{"name": "PRIVATE_PACKAGE", "total_seconds": 120, "percent": 5}]
+        output = waka.render_stats(stats, SUMMARIES)
+        self.assertNotIn("PRIVATE_PACKAGE", output)
+        self.assertNotIn("Dependencies", output)
 
     def test_ai_measurements_and_cost_are_not_inferred(self):
         output = waka.render_stats(sample_stats(), SUMMARIES)

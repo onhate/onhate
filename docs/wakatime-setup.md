@@ -33,7 +33,7 @@ pull requests run tests only. The workflow commits only README.md when it change
 
 The overview compares 7 days, 30 days, and all time. Each period has an expandable
 section with the returned languages, editors, operating systems, categories,
-dependencies, and AI measurements. No language filters or row limits are applied.
+and AI measurements. No language filters or row limits are applied.
 The daily section shows 30 calendar days, including today, in the account's time zone.
 
 Time totals include Other. Recent Stats ranges can exclude today. Each expanded
@@ -42,6 +42,8 @@ become zeroes. Missing optional fields and empty breakdowns are omitted.
 AI costs are provider estimates. The script does not infer productivity or review habits.
 
 The renderer uses an explicit list of allowed fields. It omits projects, machines,
+and dependencies. Dependency names can contain internal project and package names.
+It also omits
 paths, branches, heartbeats, and raw API responses. It retries temporary errors
 and stale stats up to four times per request. Authentication errors stop the run.
 If a required request or rendering fails, it keeps the previous README.

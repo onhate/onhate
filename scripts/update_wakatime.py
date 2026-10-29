@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 RANGES = {"last_7_days": "Last 7 days", "last_30_days": "Last 30 days", "all_time": "All time"}
 BREAKDOWNS = {"languages": "Languages", "editors": "Editors", "operating_systems": "Operating systems",
-              "categories": "Activity categories", "dependencies": "Dependencies"}
+              "categories": "Activity categories"}
 AI_METRICS = {
     "ai_additions": "AI lines added", "ai_deletions": "AI lines deleted",
     "human_additions": "Human lines added", "human_deletions": "Human lines deleted",
