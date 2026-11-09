@@ -15,7 +15,7 @@
 <details>
 <summary>Complete historical measurements</summary>
 
-Period: 2016-06-07T03:00:00Z to 2026-11-07T02:59:59Z.
+Period: 2016-06-07T03:00:00Z to 2026-11-08T02:59:59Z.
 Time zone: America/Sao\_Paulo.
 
 Best day: 2026-09-19 — 21 hrs 43 mins.
@@ -31,7 +31,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | JSON | 559 hrs 17 mins | 4.35% |
 | Markdown | 519 hrs 56 mins | 4.04% |
 | Python | 510 hrs 59 mins | 3.97% |
-| Other | 467 hrs 54 mins | 3.64% |
+| Other | 468 hrs 20 mins | 3.64% |
 | Vue.js | 446 hrs 32 mins | 3.47% |
 | Groovy | 305 hrs 49 mins | 2.38% |
 | SQL | 273 hrs 56 mins | 2.13% |
@@ -171,7 +171,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | WebStorm | 8,318 hrs 45 mins | 64.70% |
 | IntelliJ IDEA | 2,061 hrs 44 mins | 16.04% |
 | Claude Code | 1,332 hrs 59 mins | 10.37% |
-| Codex | 334 hrs 27 mins | 2.60% |
+| Codex | 334 hrs 53 mins | 2.60% |
 | VS Code | 264 hrs 30 mins | 2.06% |
 | PyCharm | 177 hrs 27 mins | 1.38% |
 | Unknown Editor | 120 hrs 21 mins | 0.94% |
@@ -191,7 +191,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Mac | 8,857 hrs 55 mins | 68.90% |
+| Mac | 8,858 hrs 21 mins | 68.90% |
 | Linux | 3,648 hrs 54 mins | 28.38% |
 | Windows | 326 hrs 1 mins | 2.54% |
 | Unknown OS | 24 hrs 9 mins | 0.19% |
@@ -201,7 +201,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | Name | Time | Share |
 | --- | --- | --- |
 | Coding | 10,749 hrs 31 mins | 83.61% |
-| AI Coding | 2,062 hrs 57 mins | 16.05% |
+| AI Coding | 2,063 hrs 23 mins | 16.05% |
 | Writing Docs | 40 hrs 52 mins | 0.32% |
 | Writing Tests | 3 hrs 40 mins | 0.03% |
 
@@ -214,21 +214,21 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | Human lines added | 11,539,423 |
 | Human lines deleted | 11,117,769 |
 | AI lines changed | 1,471,917 |
-| Input tokens | 33,364,981,649 |
-| Output tokens | 183,463,845 |
-| Estimated AI cost (USD) | $147,872.5743 |
-| AI sessions | 6,356 |
-| Prompts | 52,221 |
-| Total prompt characters | 582,261,467 |
-| Prompt characters (mean) | 11,150 |
-| Prompt characters per session (mean) | 13,205 |
+| Input tokens | 33,365,191,411 |
+| Output tokens | 183,472,695 |
+| Estimated AI cost (USD) | $147,873.4244 |
+| AI sessions | 6,359 |
+| Prompts | 52,237 |
+| Total prompt characters | 582,270,941 |
+| Prompt characters (mean) | 11,147 |
+| Prompt characters per session (mean) | 13,199 |
 | Prompt characters per session (median) | 7,990 |
 | Prompts per session (mean) | 8 |
 | Prompts per session (median) | 3 |
 
 | AI model | Lines changed | Estimated cost (USD) |
 | --- | --- | --- |
-| GPT | 631,990 | $102,962.4444 |
+| GPT | 631,990 | $102,963.2945 |
 | Claude | 522,078 | $19,124.8519 |
 | Opus | 311,843 | $17,887.6407 |
 | Cursor | 3,480 | $0.0000 |
