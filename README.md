@@ -15,7 +15,7 @@
 <details>
 <summary>Complete historical measurements</summary>
 
-Period: 2016-06-07T03:00:00Z to 2026-11-15T02:59:59Z.
+Period: 2016-06-07T03:00:00Z to 2026-11-17T02:59:59Z.
 Time zone: America/Sao\_Paulo.
 
 Best day: 2026-09-19 — 21 hrs 43 mins.
@@ -24,21 +24,21 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| TypeScript | 5,607 hrs 59 mins | 43.44% |
-| Java | 1,272 hrs 50 mins | 9.86% |
+| TypeScript | 5,608 hrs 41 mins | 43.41% |
+| Java | 1,272 hrs 50 mins | 9.85% |
 | JavaScript | 869 hrs 28 mins | 6.73% |
-| YAML | 591 hrs 18 mins | 4.58% |
-| JSON | 560 hrs 6 mins | 4.34% |
-| Markdown | 538 hrs 32 mins | 4.17% |
-| Python | 522 hrs 45 mins | 4.05% |
-| Other | 477 hrs 40 mins | 3.70% |
+| YAML | 591 hrs 41 mins | 4.58% |
+| JSON | 560 hrs 22 mins | 4.34% |
+| Markdown | 542 hrs 44 mins | 4.20% |
+| Python | 524 hrs 28 mins | 4.06% |
+| Other | 478 hrs 23 mins | 3.70% |
 | Vue.js | 446 hrs 32 mins | 3.46% |
 | Groovy | 305 hrs 49 mins | 2.37% |
 | SQL | 273 hrs 56 mins | 2.12% |
-| HTML | 221 hrs 24 mins | 1.71% |
-| GraphQL | 190 hrs 33 mins | 1.48% |
+| HTML | 221 hrs 31 mins | 1.71% |
+| GraphQL | 190 hrs 33 mins | 1.47% |
 | Transact-SQL | 171 hrs 31 mins | 1.33% |
-| Bash | 150 hrs 13 mins | 1.16% |
+| Bash | 150 hrs 14 mins | 1.16% |
 | Terraform | 135 hrs 58 mins | 1.05% |
 | XML | 88 hrs 59 mins | 0.69% |
 | Docker | 52 hrs 57 mins | 0.41% |
@@ -47,7 +47,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | CSS | 25 hrs 31 mins | 0.20% |
 | .env file | 24 hrs 11 mins | 0.19% |
 | SCSS | 23 hrs 12 mins | 0.18% |
-| TOML | 21 hrs 11 mins | 0.16% |
+| TOML | 21 hrs 42 mins | 0.17% |
 | Shell Script | 20 hrs 12 mins | 0.16% |
 | Java Server Page | 20 hrs 2 mins | 0.16% |
 | yarn.lock | 18 hrs 25 mins | 0.14% |
@@ -63,7 +63,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | TSConfig | 8 hrs 59 mins | 0.07% |
 | HCL | 8 hrs 55 mins | 0.07% |
 | Dockerfile | 6 hrs 55 mins | 0.05% |
-| Go | 4 hrs 31 mins | 0.04% |
+| Go | 4 hrs 31 mins | 0.03% |
 | Dart | 3 hrs 54 mins | 0.03% |
 | PowerQuery | 3 hrs 21 mins | 0.03% |
 | Gradle | 3 hrs 16 mins | 0.03% |
@@ -73,8 +73,8 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | tsconfig | 2 hrs 49 mins | 0.02% |
 | Robotframework | 2 hrs 45 mins | 0.02% |
 | Assembly | 2 hrs 42 mins | 0.02% |
+| Makefile | 2 hrs 20 mins | 0.02% |
 | Mustache | 2 hrs 18 mins | 0.02% |
-| Makefile | 2 hrs 18 mins | 0.02% |
 | Jest Snapshot | 1 hr 59 mins | 0.02% |
 | EJS | 1 hr 55 mins | 0.01% |
 | Perl | 1 hr 50 mins | 0.01% |
@@ -168,9 +168,9 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| WebStorm | 8,318 hrs 45 mins | 64.44% |
-| IntelliJ IDEA | 2,061 hrs 44 mins | 15.97% |
-| Claude Code | 1,375 hrs 59 mins | 10.66% |
+| WebStorm | 8,318 hrs 45 mins | 64.39% |
+| IntelliJ IDEA | 2,061 hrs 44 mins | 15.96% |
+| Claude Code | 1,384 hrs 39 mins | 10.72% |
 | Codex | 344 hrs 40 mins | 2.67% |
 | VS Code | 264 hrs 30 mins | 2.05% |
 | PyCharm | 177 hrs 27 mins | 1.37% |
@@ -191,17 +191,17 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Mac | 8,911 hrs 8 mins | 69.02% |
-| Linux | 3,648 hrs 54 mins | 28.26% |
-| Windows | 326 hrs 1 mins | 2.53% |
+| Mac | 8,919 hrs 48 mins | 69.04% |
+| Linux | 3,648 hrs 54 mins | 28.24% |
+| Windows | 326 hrs 1 mins | 2.52% |
 | Unknown OS | 24 hrs 9 mins | 0.19% |
 
 #### Activity categories
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Coding | 10,749 hrs 31 mins | 83.26% |
-| AI Coding | 2,116 hrs 9 mins | 16.39% |
+| Coding | 10,749 hrs 31 mins | 83.21% |
+| AI Coding | 2,124 hrs 49 mins | 16.45% |
 | Writing Docs | 40 hrs 52 mins | 0.32% |
 | Writing Tests | 3 hrs 40 mins | 0.03% |
 
@@ -209,19 +209,19 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Measurement | Value |
 | --- | --- |
-| AI lines added | 1,334,810 |
-| AI lines deleted | 178,495 |
+| AI lines added | 1,340,134 |
+| AI lines deleted | 179,330 |
 | Human lines added | 11,539,423 |
 | Human lines deleted | 11,117,769 |
-| AI lines changed | 1,500,505 |
-| Input tokens | 33,398,752,307 |
-| Output tokens | 190,893,646 |
-| Estimated AI cost (USD) | $148,624.4491 |
-| AI sessions | 6,441 |
-| Prompts | 53,631 |
-| Total prompt characters | 585,175,096 |
-| Prompt characters (mean) | 10,911 |
-| Prompt characters per session (mean) | 13,053 |
+| AI lines changed | 1,506,664 |
+| Input tokens | 33,408,211,127 |
+| Output tokens | 192,723,001 |
+| Estimated AI cost (USD) | $148,850.6701 |
+| AI sessions | 6,456 |
+| Prompts | 54,143 |
+| Total prompt characters | 586,488,998 |
+| Prompt characters (mean) | 10,832 |
+| Prompt characters per session (mean) | 13,025 |
 | Prompt characters per session (median) | 7,872 |
 | Prompts per session (mean) | 8 |
 | Prompts per session (median) | 3 |
@@ -230,11 +230,11 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | --- | --- | --- |
 | GPT | 632,265 | $103,024.2268 |
 | Claude | 522,078 | $19,124.8519 |
-| Opus | 340,156 | $18,537.4099 |
+| Opus | 346,315 | $18,735.1544 |
 | Cursor | 3,480 | $0.0000 |
 | Codex | 1,875 | $6,208.6883 |
 | Fable | 445 | $46.1292 |
-| Sonnet | 185 | $927.1048 |
+| Sonnet | 185 | $955.5812 |
 | Vscode-Wakatime | 21 | $739.8199 |
 | Haiku | 0 | $16.2184 |
 
