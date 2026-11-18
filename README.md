@@ -15,7 +15,7 @@
 <details>
 <summary>Complete historical measurements</summary>
 
-Period: 2016-06-07T03:00:00Z to 2026-11-17T02:59:59Z.
+Period: 2016-06-07T03:00:00Z to 2026-11-18T02:59:59Z.
 Time zone: America/Sao\_Paulo.
 
 Best day: 2026-09-19 — 21 hrs 43 mins.
@@ -24,18 +24,18 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| TypeScript | 5,608 hrs 41 mins | 43.41% |
+| TypeScript | 5,613 hrs 4 mins | 43.42% |
 | Java | 1,272 hrs 50 mins | 9.85% |
 | JavaScript | 869 hrs 28 mins | 6.73% |
-| YAML | 591 hrs 41 mins | 4.58% |
-| JSON | 560 hrs 22 mins | 4.34% |
-| Markdown | 542 hrs 44 mins | 4.20% |
-| Python | 524 hrs 28 mins | 4.06% |
-| Other | 478 hrs 23 mins | 3.70% |
-| Vue.js | 446 hrs 32 mins | 3.46% |
+| YAML | 592 hrs 15 mins | 4.58% |
+| JSON | 560 hrs 45 mins | 4.34% |
+| Markdown | 543 hrs 25 mins | 4.20% |
+| Python | 526 hrs 45 mins | 4.07% |
+| Other | 479 hrs 10 mins | 3.71% |
+| Vue.js | 446 hrs 32 mins | 3.45% |
 | Groovy | 305 hrs 49 mins | 2.37% |
 | SQL | 273 hrs 56 mins | 2.12% |
-| HTML | 221 hrs 31 mins | 1.71% |
+| HTML | 221 hrs 46 mins | 1.72% |
 | GraphQL | 190 hrs 33 mins | 1.47% |
 | Transact-SQL | 171 hrs 31 mins | 1.33% |
 | Bash | 150 hrs 14 mins | 1.16% |
@@ -47,7 +47,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | CSS | 25 hrs 31 mins | 0.20% |
 | .env file | 24 hrs 11 mins | 0.19% |
 | SCSS | 23 hrs 12 mins | 0.18% |
-| TOML | 21 hrs 42 mins | 0.17% |
+| TOML | 21 hrs 51 mins | 0.17% |
 | Shell Script | 20 hrs 12 mins | 0.16% |
 | Java Server Page | 20 hrs 2 mins | 0.16% |
 | yarn.lock | 18 hrs 25 mins | 0.14% |
@@ -168,9 +168,9 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| WebStorm | 8,318 hrs 45 mins | 64.39% |
-| IntelliJ IDEA | 2,061 hrs 44 mins | 15.96% |
-| Claude Code | 1,384 hrs 39 mins | 10.72% |
+| WebStorm | 8,318 hrs 45 mins | 64.34% |
+| IntelliJ IDEA | 2,061 hrs 44 mins | 15.95% |
+| Claude Code | 1,394 hrs 9 mins | 10.78% |
 | Codex | 344 hrs 40 mins | 2.67% |
 | VS Code | 264 hrs 30 mins | 2.05% |
 | PyCharm | 177 hrs 27 mins | 1.37% |
@@ -191,8 +191,8 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Mac | 8,919 hrs 48 mins | 69.04% |
-| Linux | 3,648 hrs 54 mins | 28.24% |
+| Mac | 8,929 hrs 18 mins | 69.07% |
+| Linux | 3,648 hrs 54 mins | 28.22% |
 | Windows | 326 hrs 1 mins | 2.52% |
 | Unknown OS | 24 hrs 9 mins | 0.19% |
 
@@ -200,8 +200,8 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Coding | 10,749 hrs 31 mins | 83.21% |
-| AI Coding | 2,124 hrs 49 mins | 16.45% |
+| Coding | 10,749 hrs 31 mins | 83.15% |
+| AI Coding | 2,134 hrs 20 mins | 16.51% |
 | Writing Docs | 40 hrs 52 mins | 0.32% |
 | Writing Tests | 3 hrs 40 mins | 0.03% |
 
@@ -209,19 +209,19 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Measurement | Value |
 | --- | --- |
-| AI lines added | 1,340,134 |
-| AI lines deleted | 179,330 |
+| AI lines added | 1,347,971 |
+| AI lines deleted | 180,425 |
 | Human lines added | 11,539,423 |
 | Human lines deleted | 11,117,769 |
-| AI lines changed | 1,506,664 |
-| Input tokens | 33,408,211,127 |
-| Output tokens | 192,723,001 |
-| Estimated AI cost (USD) | $148,850.6701 |
-| AI sessions | 6,456 |
-| Prompts | 54,143 |
-| Total prompt characters | 586,488,998 |
-| Prompt characters (mean) | 10,832 |
-| Prompt characters per session (mean) | 13,025 |
+| AI lines changed | 1,515,596 |
+| Input tokens | 33,414,895,805 |
+| Output tokens | 194,467,763 |
+| Estimated AI cost (USD) | $149,057.0360 |
+| AI sessions | 6,469 |
+| Prompts | 54,411 |
+| Total prompt characters | 586,811,684 |
+| Prompt characters (mean) | 10,785 |
+| Prompt characters per session (mean) | 12,999 |
 | Prompt characters per session (median) | 7,872 |
 | Prompts per session (mean) | 8 |
 | Prompts per session (median) | 3 |
@@ -230,11 +230,11 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | --- | --- | --- |
 | GPT | 632,265 | $103,024.2268 |
 | Claude | 522,078 | $19,124.8519 |
-| Opus | 346,315 | $18,735.1544 |
+| Opus | 355,247 | $18,940.0932 |
 | Cursor | 3,480 | $0.0000 |
 | Codex | 1,875 | $6,208.6883 |
 | Fable | 445 | $46.1292 |
-| Sonnet | 185 | $955.5812 |
+| Sonnet | 185 | $957.0083 |
 | Vscode-Wakatime | 21 | $739.8199 |
 | Haiku | 0 | $16.2184 |
 
