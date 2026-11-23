@@ -15,7 +15,7 @@
 <details>
 <summary>Complete historical measurements</summary>
 
-Period: 2016-06-07T03:00:00Z to 2026-11-21T02:59:59Z.
+Period: 2016-06-07T03:00:00Z to 2026-11-22T02:59:59Z.
 Time zone: America/Sao\_Paulo.
 
 Best day: 2026-09-19 — 21 hrs 43 mins.
@@ -24,17 +24,17 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| TypeScript | 5,616 hrs 38 mins | 43.34% |
+| TypeScript | 5,617 hrs 54 mins | 43.34% |
 | Java | 1,272 hrs 50 mins | 9.82% |
 | JavaScript | 869 hrs 28 mins | 6.71% |
-| YAML | 593 hrs 31 mins | 4.58% |
-| JSON | 561 hrs 13 mins | 4.33% |
-| Markdown | 550 hrs 33 mins | 4.25% |
-| Python | 537 hrs 58 mins | 4.15% |
+| YAML | 594 hrs 6 mins | 4.58% |
+| JSON | 561 hrs 16 mins | 4.33% |
+| Markdown | 551 hrs 15 mins | 4.25% |
+| Python | 538 hrs 22 mins | 4.15% |
 | Other | 481 hrs 43 mins | 3.72% |
 | Vue.js | 446 hrs 32 mins | 3.45% |
 | Groovy | 305 hrs 49 mins | 2.36% |
-| SQL | 273 hrs 59 mins | 2.11% |
+| SQL | 274 hrs 1 mins | 2.11% |
 | HTML | 223 hrs 40 mins | 1.73% |
 | GraphQL | 190 hrs 33 mins | 1.47% |
 | Transact-SQL | 171 hrs 31 mins | 1.32% |
@@ -168,9 +168,9 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| WebStorm | 8,318 hrs 45 mins | 64.20% |
+| WebStorm | 8,318 hrs 45 mins | 64.18% |
 | IntelliJ IDEA | 2,061 hrs 44 mins | 15.91% |
-| Claude Code | 1,423 hrs 59 mins | 10.99% |
+| Claude Code | 1,427 hrs 1 mins | 11.01% |
 | Codex | 344 hrs 40 mins | 2.66% |
 | VS Code | 264 hrs 30 mins | 2.04% |
 | PyCharm | 177 hrs 27 mins | 1.37% |
@@ -191,8 +191,8 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Mac | 8,959 hrs 8 mins | 69.14% |
-| Linux | 3,648 hrs 54 mins | 28.16% |
+| Mac | 8,962 hrs 10 mins | 69.15% |
+| Linux | 3,648 hrs 54 mins | 28.15% |
 | Windows | 326 hrs 1 mins | 2.52% |
 | Unknown OS | 24 hrs 9 mins | 0.19% |
 
@@ -200,8 +200,8 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Name | Time | Share |
 | --- | --- | --- |
-| Coding | 10,749 hrs 31 mins | 82.96% |
-| AI Coding | 2,164 hrs 9 mins | 16.70% |
+| Coding | 10,749 hrs 31 mins | 82.94% |
+| AI Coding | 2,167 hrs 11 mins | 16.72% |
 | Writing Docs | 40 hrs 52 mins | 0.32% |
 | Writing Tests | 3 hrs 40 mins | 0.03% |
 
@@ -209,19 +209,19 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 
 | Measurement | Value |
 | --- | --- |
-| AI lines added | 1,368,938 |
-| AI lines deleted | 185,063 |
+| AI lines added | 1,370,206 |
+| AI lines deleted | 185,238 |
 | Human lines added | 11,539,423 |
 | Human lines deleted | 11,117,769 |
-| AI lines changed | 1,541,201 |
-| Input tokens | 33,435,412,274 |
-| Output tokens | 199,155,832 |
-| Estimated AI cost (USD) | $149,544.3046 |
-| AI sessions | 6,541 |
-| Prompts | 55,187 |
-| Total prompt characters | 588,024,943 |
-| Prompt characters (mean) | 10,655 |
-| Prompt characters per session (mean) | 12,867 |
+| AI lines changed | 1,542,644 |
+| Input tokens | 33,436,760,498 |
+| Output tokens | 199,438,977 |
+| Estimated AI cost (USD) | $149,571.2782 |
+| AI sessions | 6,546 |
+| Prompts | 55,238 |
+| Total prompt characters | 588,053,103 |
+| Prompt characters (mean) | 10,646 |
+| Prompt characters per session (mean) | 12,858 |
 | Prompt characters per session (median) | 7,809 |
 | Prompts per session (mean) | 8 |
 | Prompts per session (median) | 3 |
@@ -230,7 +230,7 @@ Best day: 2026-09-19 — 21 hrs 43 mins.
 | --- | --- | --- |
 | GPT | 632,265 | $103,024.2268 |
 | Claude | 522,078 | $19,124.8519 |
-| Opus | 380,852 | $19,422.9213 |
+| Opus | 382,295 | $19,449.8949 |
 | Cursor | 3,480 | $0.0000 |
 | Codex | 1,875 | $6,208.6883 |
 | Fable | 445 | $46.1292 |
